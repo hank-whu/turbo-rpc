@@ -10,6 +10,7 @@ import rpc.turbo.util.concurrent.ConcurrentIntegerSequencer;
  * @author Hank
  *
  * @param <T>
+ *            必须为Weightable子类
  */
 public class RoundRobinLoadBalance<T extends Weightable> implements LoadBalance<T> {
 	private final ConcurrentIntegerSequencer sequencer = new ConcurrentIntegerSequencer(0, true);

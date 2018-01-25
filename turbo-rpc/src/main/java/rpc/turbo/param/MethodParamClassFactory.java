@@ -24,11 +24,12 @@ public final class MethodParamClassFactory {
 	private static final String NOT_SUPPORT_PARAMETER_NAME_MSG = "must turn on \"Store information about method parameters (usable via reflection)\", see https://www.concretepage.com/java/jdk-8/java-8-reflection-access-to-parameter-names-of-method-and-constructor-with-maven-gradle-and-eclipse-using-parameters-compiler-argument";
 
 	/**
-	 * 方法参数封装，用于序列化传输参数数据，其实现类会自动根据方法名称生成get/set方法，</br>
-	 * 必须开启"Store information about method parameters (usable via reflection)"</br>
-	 * 参考：https://www.concretepage.com/java/jdk-8/java-8-reflection-access-to-parameter-names-of-method-and-constructor-with-maven-gradle-and-eclipse-using-parameters-compiler-argument</br>
-	 * </br>
-	 * 方法public CompletableFuture<User> getUser(long id) 将会生成下面的MethodParamClass：
+	 * 方法参数封装，用于序列化传输参数数据，其实现类会自动根据方法名称生成get/set方法，<br>
+	 * 必须开启"Store information about method parameters (usable via reflection)"<br>
+	 * 参考：https://www.concretepage.com/java/jdk-8/java-8-reflection-access-to-parameter-names-of-method-and-constructor-with-maven-gradle-and-eclipse-using-parameters-compiler-argument<br>
+	 * <br>
+	 * 方法public CompletableFuture&lt;User&gt; getUser(long id)
+	 * 将会生成下面的MethodParamClass：
 	 * 
 	 * <pre>
 	 * public class UserService_getUser_1_6f7c1a8cf867a945306fb82a78c0a191265b9786 implements MethodParam {

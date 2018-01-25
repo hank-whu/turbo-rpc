@@ -34,7 +34,6 @@ public class MethodHandleInvoker<T> implements Invoker<T> {
 	 *            the service interface
 	 * 
 	 * @param method
-	 * @throws Exception
 	 */
 	public MethodHandleInvoker(int serviceId, Object service, Class<?> clazz, Method method) {
 		this.serviceId = serviceId;

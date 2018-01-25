@@ -24,12 +24,10 @@ public interface RemoteInterface {
 	/**
 	 * 
 	 * @param methodId
-	 * 
 	 * @param timeout
 	 *            超时时间，millseconds
-	 * 
-	 * @param params
-	 * 
+	 * @param methodParam
+	 * @param failoverInvoker
 	 * @return
 	 */
 	default public CompletableFuture<?> $remote_execute(int methodId, long timeout, MethodParam methodParam,
@@ -53,17 +51,6 @@ public interface RemoteInterface {
 		}
 	}
 
-	/**
-	 * 
-	 * @param methodId
-	 * 
-	 * @param timeout
-	 *            超时时间，millseconds
-	 * 
-	 * @param params
-	 * 
-	 * @return
-	 */
 	default public CompletableFuture<?> $remote_ignore() {
 		return CompletableFuture.failedFuture(IGNORED);
 	}

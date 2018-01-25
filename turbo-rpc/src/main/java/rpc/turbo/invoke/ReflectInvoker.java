@@ -30,7 +30,6 @@ public class ReflectInvoker<T> implements Invoker<T> {
 	 *            the service interface
 	 * 
 	 * @param method
-	 * @throws Exception
 	 */
 	public ReflectInvoker(int serviceId, Object service, Class<?> clazz, Method method) {
 		this.serviceId = serviceId;

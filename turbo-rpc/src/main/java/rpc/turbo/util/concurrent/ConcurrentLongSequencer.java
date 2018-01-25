@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 /**
- * 高性能序号生成器，是AtomicLong性能的10x，</br>
- * 实现原理为每个线程持有100个数字，线程内简单递增，</br>
+ * 高性能序号生成器，是AtomicLong性能的10x，<br>
+ * 实现原理为每个线程持有100个数字，线程内简单递增，<br>
  * 该生成器生成数字整体上并不是简单递增的，仅适用于特定场景
  * 
  * @author Hank

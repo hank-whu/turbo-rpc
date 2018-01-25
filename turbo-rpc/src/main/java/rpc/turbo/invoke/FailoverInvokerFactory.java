@@ -39,13 +39,12 @@ public class FailoverInvokerFactory {
 	 * 注册failvoer invoker
 	 * 
 	 * @param failover
-	 *            松散约束可以不实现服务接口，只要方法签名一致就能自动匹配上,</br>
+	 *            松散约束可以不实现服务接口，只要方法签名一致就能自动匹配上,<br>
 	 *            优先于clazz服务接口中的默认方法
 	 * 
 	 * @param clazz
 	 *            服务接口，当接口中包含公开的默认方法时自动注册为出错回退方法
 	 * 
-	 * @return
 	 */
 	public void register(Class<?> clazz, Object failover) {
 		convertToInvokerStream(clazz, failover)//

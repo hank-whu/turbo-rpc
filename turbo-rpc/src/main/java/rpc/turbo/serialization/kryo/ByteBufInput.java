@@ -89,7 +89,7 @@ public class ByteBufInput extends Input {
 
 	/**
 	 * @param required
-	 *            Must be > 0. The byteBuf is filled until it has at least this many
+	 *            Must be &gt; 0. The byteBuf is filled until it has at least this many
 	 *            bytes.
 	 * @return the number of bytes remaining.
 	 * @throws KryoException

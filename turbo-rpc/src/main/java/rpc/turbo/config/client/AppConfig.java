@@ -133,7 +133,7 @@ public class AppConfig {
 	/**
 	 * 从配置文件读取配置
 	 * 
-	 * @param resourceName
+	 * @param appConfigList
 	 *            typesafe config <a>https://github.com/lightbend/config</a>
 	 * @return
 	 */

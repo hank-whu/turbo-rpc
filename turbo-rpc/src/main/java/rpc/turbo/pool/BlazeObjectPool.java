@@ -10,7 +10,7 @@ import stormpot.PoolException;
 import stormpot.Timeout;
 
 /**
- * high performance objectpool</br>
+ * high performance objectpool<br>
  * https://github.com/chrisvest/object-pool-benchmarks
  * 
  * @author Hank

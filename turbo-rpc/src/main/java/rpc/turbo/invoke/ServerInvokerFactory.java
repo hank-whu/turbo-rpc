@@ -115,7 +115,6 @@ public class ServerInvokerFactory {
 	 * @param clazz
 	 *            服务接口
 	 * 
-	 * @return
 	 */
 	public synchronized void register(Class<?> clazz, Object service) {
 		register(Map.of(clazz, service));

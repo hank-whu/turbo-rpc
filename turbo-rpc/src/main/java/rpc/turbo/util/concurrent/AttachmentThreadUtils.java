@@ -7,9 +7,9 @@ import io.netty.util.internal.InternalThreadLocalMap;
 import rpc.turbo.util.IntToObjectArrayMap;
 
 /**
- * 当线程为AttachmentThread、FastThreadLocalThread时能达到ThreadLocal 1.5x的性能；</br>
- * 当线程不是上述两种，并且线程id小于16k时，可获得跟ThreadLocal相同的性能；</br>
- * 当线程不满足上述两种情况，将只能达到ThreadLocal 0.7x的性能；</br>
+ * 当线程为AttachmentThread、FastThreadLocalThread时能达到ThreadLocal 1.5x的性能；<br>
+ * 当线程不是上述两种，并且线程id小于16k时，可获得跟ThreadLocal相同的性能；<br>
+ * 当线程不满足上述两种情况，将只能达到ThreadLocal 0.7x的性能；<br>
  * 请谨慎使用，小心内存泄漏！
  * 
  * @author Hank
@@ -183,7 +183,6 @@ public final class AttachmentThreadUtils {
 	 * 
 	 * @param value
 	 * 
-	 * @return
 	 */
 	public static <T> void put(int index, T value) {
 

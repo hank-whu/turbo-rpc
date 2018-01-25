@@ -43,7 +43,7 @@ import rpc.turbo.util.IntToObjectArrayMap;
  * Base on kryo DefaultClassResolver. Resolves classes by ID or by fully
  * qualified class name.
  * 
- * @author Nathan Sweet <misc@n4te.com>
+ * @author Nathan Sweet
  */
 @SuppressWarnings("rawtypes")
 public class FastClassResolver implements ClassResolver {

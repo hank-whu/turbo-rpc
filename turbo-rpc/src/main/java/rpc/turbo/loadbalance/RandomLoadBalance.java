@@ -5,9 +5,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 速度略慢 115.069 ± 1.193 ops/us
+ * 
  * @author Hank
  *
  * @param <T>
+ *            必须为Weightable子类
  */
 public class RandomLoadBalance<T extends Weightable> implements LoadBalance<T> {
 

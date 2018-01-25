@@ -47,7 +47,7 @@ public final class ByteBufInput implements Input {
 	/**
 	 * An input for a ByteBuffer
 	 * 
-	 * @param buffer
+	 * @param byteBuf
 	 *            the buffer to read from, it will be sliced
 	 * @param protostuffMessage
 	 *            if we are parsing a protostuff (true) or protobuf (false) message

@@ -11,6 +11,7 @@ import rpc.turbo.util.MathUtils;
  * @author Hank
  *
  * @param <T>
+ *            必须为Weightable子类
  */
 public final class WeightableGroup<T extends Weightable> {
 	private final ArrayList<T> weightables;
@@ -72,7 +73,7 @@ public final class WeightableGroup<T extends Weightable> {
 	}
 
 	/**
-	 * 获取weight之和，配合{@link #get(int)}使用</br>
+	 * 获取weight之和，配合{@link #get(int)}使用<br>
 	 * 
 	 * <pre>
 	 * int seed = rendom.nextInt(sum());
@@ -86,7 +87,7 @@ public final class WeightableGroup<T extends Weightable> {
 	}
 
 	/**
-	 * 根据种子获取一个元素, 配合 {@link #sum()}使用</br>
+	 * 根据种子获取一个元素, 配合 {@link #sum()}使用<br>
 	 * 
 	 * <pre>
 	 * int seed = rendom.nextInt(sum());

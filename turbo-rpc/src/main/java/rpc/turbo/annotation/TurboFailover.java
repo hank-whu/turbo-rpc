@@ -11,8 +11,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * 远程调用失败时的回退实现，</br>
- * 松散约束可以不实现服务接口，只要方法签名一致就能自动匹配上,</br>
+ * 远程调用失败时的回退实现，<br>
+ * 松散约束可以不实现服务接口，只要方法签名一致就能自动匹配上,<br>
  * 优先于RPCService接口中的默认方法
  * 
  * @author Hank

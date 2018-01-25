@@ -42,7 +42,7 @@ public class AttachmentThread extends FastThreadLocalThread {
 	 * 存储线程变量
 	 * 
 	 * @param index
-	 *            需要从 {@link #nextVarIndex()}获取到
+	 *            需要从AttachmentThreadUtils.nextVarIndex()获取到
 	 * @param value
 	 */
 	public void put(int index, Object value) {
@@ -63,7 +63,7 @@ public class AttachmentThread extends FastThreadLocalThread {
 	 * 获取线程变量
 	 * 
 	 * @param index
-	 *            需要从 {@link #nextVarIndex()}获取到
+	 *            需要从 AttachmentThreadUtils.nextVarIndex()获取到
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")

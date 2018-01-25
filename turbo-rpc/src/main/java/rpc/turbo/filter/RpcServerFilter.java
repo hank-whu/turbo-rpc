@@ -13,7 +13,7 @@ public interface RpcServerFilter {
 	 * @param request
 	 *            不为空，为空的情况会调用{@link #onError(Request, Response, Throwable)}
 	 * 
-	 * @return true表示允许发送，false表示不允许发送，</br>
+	 * @return true表示允许发送，false表示不允许发送，<br>
 	 *         不允许发送的情况将返回"rpc server filter deny this request"给客户端
 	 */
 	boolean onRecive(Request request);

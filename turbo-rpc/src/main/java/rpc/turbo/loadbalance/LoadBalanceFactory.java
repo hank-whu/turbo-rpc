@@ -5,6 +5,7 @@ package rpc.turbo.loadbalance;
  * @author Hank
  *
  * @param <T>
+ *            必须为Weightable子类
  */
 public interface LoadBalanceFactory<T extends Weightable> {
 

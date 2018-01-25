@@ -115,7 +115,7 @@ public class App implements Closeable {
 	/**
 	 * 建立连接
 	 * 
-	 * @param hostPost
+	 * @param serverAddresss
 	 * @throws Exception
 	 */
 	public void setConnect(HostPort... serverAddresss) throws Exception {
@@ -360,7 +360,7 @@ public class App implements Closeable {
 	/**
 	 * 获取methodId
 	 * 
-	 * @param method
+	 * @param methodString
 	 * @return
 	 */
 	public Integer getMethodId(String methodString) {

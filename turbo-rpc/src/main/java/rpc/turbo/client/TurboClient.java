@@ -95,7 +95,6 @@ public final class TurboClient implements Closeable {
 	 * @param app
 	 * @param clazz
 	 * @param failover
-	 * @throws Exception
 	 */
 	public <T> void register(String group, String app, Class<T> clazz, Object failover) {
 		T service = remoteServiceFactory.getService(clazz);
@@ -134,7 +133,6 @@ public final class TurboClient implements Closeable {
 	 * 注册一个远程服务
 	 * 
 	 * @param clazz
-	 * @throws Exception
 	 */
 	public <T> void register(Class<T> clazz) {
 		Objects.requireNonNull(clazz, "clazz");
@@ -169,7 +167,6 @@ public final class TurboClient implements Closeable {
 	 * 
 	 * @param clazz
 	 * @param failover
-	 * @throws Exception
 	 */
 	public <T> void setFailover(Class<T> clazz, Object failover) {
 		Objects.requireNonNull(clazz, "clazz");
@@ -189,7 +186,7 @@ public final class TurboClient implements Closeable {
 	}
 
 	/**
-	 * 获取一个远程服务，必须先注册 :</br>
+	 * 获取一个远程服务，必须先注册 :<br>
 	 * {@link #register(Class)} or {@link #register(String, String, Class, Object)}
 	 * 
 	 * @param clazz

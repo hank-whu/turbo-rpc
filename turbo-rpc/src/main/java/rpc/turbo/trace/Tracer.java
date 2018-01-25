@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import rpc.turbo.protocol.Request;
 import rpc.turbo.protocol.Response;
+import rpc.turbo.serialization.TracerSerializer;
 import rpc.turbo.util.uuid.ObjectId;
 
 /**
