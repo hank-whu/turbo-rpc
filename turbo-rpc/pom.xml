@@ -4,7 +4,7 @@
 
 	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-rpc</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-rpc</name>
@@ -38,7 +38,7 @@
 		<maven.compiler.source>1.9</maven.compiler.source>
 		<maven.compiler.target>1.9</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.rpc-turbo>0.0.1</version.rpc-turbo>
+		<version.rpc-turbo>0.0.2</version.rpc-turbo>
 		<version.netty>4.1.19.Final</version.netty>
 		<version.jackson>2.9.3</version.jackson>
 		<version.kryo>4.0.1</version.kryo>

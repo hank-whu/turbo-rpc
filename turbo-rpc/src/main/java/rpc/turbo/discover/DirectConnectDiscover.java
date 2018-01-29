@@ -24,19 +24,6 @@ public class DirectConnectDiscover implements Discover {
 				.collect(Collectors.toMap(item -> item, item -> TurboService.DEFAULT_WEIGHT));
 
 		listener.onChange(providerWithWeight);
-
-		new Thread(() -> {
-			while (true) {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					break;
-				}
-
-				System.out.println("DirectConnectDiscover onChange");
-				listener.onChange(providerWithWeight);
-			}
-		}).start();
 	}
 
 	@Override

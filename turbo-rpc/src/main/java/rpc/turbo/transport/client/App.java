@@ -97,6 +97,10 @@ public class App implements Closeable {
 		if (appConfig.getDiscover() != null) {
 			appConfig.getDiscover().addListener(appConfig.getGroup(), appConfig.getApp(), Protocol.RPC,
 					serverWithWeight -> {
+						if (isCloseing) {
+							return;
+						}
+
 						if (logger.isInfoEnabled()) {
 							logger.info("Discover检测到服务变化: " + serverWithWeight);
 						}
@@ -123,6 +127,10 @@ public class App implements Closeable {
 			return;
 		}
 
+		if (isCloseing) {
+			return;
+		}
+
 		Map<HostPort, Integer> providerWithWeight = Stream//
 				.of(serverAddresss)//
 				.collect(Collectors.toMap(t -> t, t -> Integer.valueOf(TurboService.DEFAULT_WEIGHT)));
@@ -142,6 +150,10 @@ public class App implements Closeable {
 			return;
 		}
 
+		if (isCloseing) {
+			return;
+		}
+
 		tryStartDemoJob();
 
 		AtomicBoolean changed = new AtomicBoolean(false);
@@ -154,6 +166,10 @@ public class App implements Closeable {
 					.parallel()// 并发的建立连接
 					.filter(kv -> !activeMap.containsKey(kv.getKey()))// 过滤掉已连接上的
 					.forEach(kv -> {
+						if (isCloseing) {
+							return;
+						}
+
 						changed.set(true);
 						setConnect(kv.getKey(), kv.getValue());
 					});
@@ -166,6 +182,10 @@ public class App implements Closeable {
 					.stream()//
 					.parallel()//
 					.forEach(kv -> {
+						if (isCloseing) {
+							return;
+						}
+
 						HostPort serverAddress = kv.getKey();
 
 						if (!serverWithWeight.containsKey(serverAddress)) {
@@ -190,6 +210,10 @@ public class App implements Closeable {
 					.stream()//
 					.parallel()//
 					.forEach(kv -> {
+						if (isCloseing) {
+							return;
+						}
+						
 						changed.set(true);
 						HostPort serverAddress = kv.getKey();
 
@@ -227,6 +251,10 @@ public class App implements Closeable {
 	 * @throws Exception
 	 */
 	private synchronized void setConnect(HostPort serverAddress, int weight) {
+		if (isCloseing) {
+			return;
+		}
+		
 		ConnectorContext context = new ConnectorContext(eventLoopGroup, appConfig, appConfig.getSerializer(), filters,
 				serverAddress);
 
@@ -260,6 +288,10 @@ public class App implements Closeable {
 	}
 
 	private synchronized void addConnect(ConnectorContext context) throws Exception {
+		if (isCloseing) {
+			return;
+		}
+		
 		if (context == null) {
 			return;
 		}
@@ -271,6 +303,10 @@ public class App implements Closeable {
 	}
 
 	private synchronized void tryStartDemoJob() {
+		if (isCloseing) {
+			return;
+		}
+		
 		if (rescueAndHeartbeatJobThread != null || expireCheckerJobThread != null) {
 			return;
 		}
@@ -530,6 +566,10 @@ public class App implements Closeable {
 	}
 
 	private void heartbeat() {
+		if (isCloseing) {
+			return;
+		}
+		
 		if (logger.isDebugEnabled()) {
 			logger.debug(group + "#" + app + " start heartbeat");
 		}
@@ -539,6 +579,10 @@ public class App implements Closeable {
 				.stream()//
 				.parallel()//
 				.forEach(kv -> {
+					if (isCloseing) {
+						return;
+					}
+					
 					HostPort serverAddress = kv.getKey();
 					ConnectorContext context = kv.getValue();
 
@@ -558,6 +602,10 @@ public class App implements Closeable {
 	}
 
 	private void rescue() {
+		if (isCloseing) {
+			return;
+		}
+		
 		if (logger.isDebugEnabled()) {
 			logger.debug(group + "#" + app + " start rescue zombies");
 		}
@@ -575,6 +623,10 @@ public class App implements Closeable {
 				.stream()//
 				.parallel()//
 				.forEach(kv -> {
+					if (isCloseing) {
+						return;
+					}
+					
 					HostPort serverAddress = kv.getKey();
 					ConnectorContext context = kv.getValue();
 
