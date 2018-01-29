@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +24,8 @@ import rpc.turbo.util.concurrent.ThreadLocalStringBuilder;
 public final class MethodParamClassFactory {
 
 	private static final String NOT_SUPPORT_PARAMETER_NAME_MSG = "must turn on \"Store information about method parameters (usable via reflection)\", see https://www.concretepage.com/java/jdk-8/java-8-reflection-access-to-parameter-names-of-method-and-constructor-with-maven-gradle-and-eclipse-using-parameters-compiler-argument";
+
+	private static final ConcurrentMap<Method, Class<? extends MethodParam>> methodParamClassMap = new ConcurrentHashMap<>();
 
 	/**
 	 * 方法参数封装，用于序列化传输参数数据，其实现类会自动根据方法名称生成get/set方法，<br>
@@ -60,7 +64,7 @@ public final class MethodParamClassFactory {
 	 * @author Hank
 	 *
 	 */
-	@SuppressWarnings("unchecked")
+
 	public static Class<? extends MethodParam> createClass(Method method)
 			throws CannotCompileException, NotFoundException {
 		Objects.requireNonNull(method, "method must not be null");
@@ -69,6 +73,27 @@ public final class MethodParamClassFactory {
 			return EmptyMethodParam.class;
 		}
 
+		Class<? extends MethodParam> methodParamClass = methodParamClassMap.get(method);
+		if (methodParamClass != null) {
+			return methodParamClass;
+		}
+
+		synchronized (MethodParamClassFactory.class) {
+			methodParamClass = methodParamClassMap.get(method);
+			if (methodParamClass != null) {
+				return methodParamClass;
+			}
+
+			methodParamClass = doCreateClass(method);
+			methodParamClassMap.put(method, methodParamClass);
+		}
+
+		return methodParamClass;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends MethodParam> doCreateClass(Method method)
+			throws CannotCompileException, NotFoundException {
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		Parameter[] parameters = method.getParameters();
 
@@ -159,4 +184,5 @@ public final class MethodParamClassFactory {
 
 		return (Class<? extends MethodParam>) methodParamCtClass.toClass();
 	}
+
 }
