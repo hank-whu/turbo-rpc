@@ -17,6 +17,7 @@ public final class WeightableGroup<T extends Weightable> {
 	private final ArrayList<T> weightables;
 	private final int[] weightLadder;
 	private final int weightSum;
+	private final boolean fastMode;
 
 	public WeightableGroup(final List<T> weightables) {
 		ArrayList<T> weightableList = new ArrayList<>(weightables.size());
@@ -38,6 +39,8 @@ public final class WeightableGroup<T extends Weightable> {
 			this.weightLadder = new int[0];
 			this.weightSum = 0;
 
+			this.fastMode = true;
+
 			return;
 		}
 
@@ -45,6 +48,8 @@ public final class WeightableGroup<T extends Weightable> {
 			this.weightables = weightableList;
 			this.weightLadder = new int[1];
 			this.weightSum = 1;
+
+			this.fastMode = true;
 
 			return;
 		}
@@ -63,8 +68,22 @@ public final class WeightableGroup<T extends Weightable> {
 			}
 		}
 
+		boolean isFastMode = true;
+		for (int i = 0; i < weights.length; i++) {
+			if (weights[i] != 1) {
+				isFastMode = false;
+				break;
+			}
+		}
+
+		this.fastMode = isFastMode;
+
 		for (int i = 1; i < weights.length; i++) {
 			weights[i] = weights[i] + weights[i - 1];
+		}
+
+		for (int i = 0; i < weights.length; i++) {
+			weights[i] -= 1;// [0,1) [1,2) 前开后闭
 		}
 
 		this.weightables = weightableList;
@@ -106,8 +125,16 @@ public final class WeightableGroup<T extends Weightable> {
 			return weightables.get(0);
 		}
 
-		if (seed < 0 || seed > weightSum) {
-			seed = Math.abs(seed) % weightSum;
+		if (seed < 0) {
+			seed = -seed;
+		}
+
+		if (seed > weightSum) {
+			seed = seed % (weightSum + 1);
+		}
+
+		if (fastMode) {
+			return weightables.get(seed);
 		}
 
 		int index = binarySearch(weightLadder, seed);

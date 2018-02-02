@@ -32,7 +32,7 @@ public class RandomLoadBalance<T extends Weightable> implements LoadBalance<T> {
 			return weightableGroup.get(0);
 		}
 
-		int seed = ThreadLocalRandom.current().nextInt(sum);
+		int seed = ThreadLocalRandom.current().nextInt(sum + 1);
 		return weightableGroup.get(seed);
 	}
 
