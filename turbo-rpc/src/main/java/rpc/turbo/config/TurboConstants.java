@@ -9,6 +9,6 @@ public class TurboConstants {
 	/**
 	 * 请求体最大大小
 	 */
-	public static final int MAX_FRAME_LENGTH = 1024 * 1024 * 8;
+	public static final int MAX_FRAME_LENGTH = 1024 * 1024 * 2;
 
 }

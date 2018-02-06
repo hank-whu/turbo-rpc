@@ -47,41 +47,6 @@ public class ByteBufUtils {
 		byteBuf.writeByte((byte) (value >>> 28));
 	}
 
-	// low performance
-	public static void writeVarIntDirect(ByteBuf byteBuf, int value) {
-		if (value >>> 7 == 0) {
-			byteBuf.writeByte((byte) value);
-			return;
-		}
-
-		if (value >>> 14 == 0) {
-			byteBuf.writeByte((byte) ((value & 0x7F) | 0x80));
-			byteBuf.writeByte((byte) (value >>> 7));
-			return;
-		}
-
-		if (value >>> 21 == 0) {
-			byteBuf.writeByte((byte) ((value & 0x7F) | 0x80));
-			byteBuf.writeByte((byte) (value >>> 7 | 0x80));
-			byteBuf.writeByte((byte) (value >>> 14));
-			return;
-		}
-
-		if (value >>> 28 == 0) {
-			byteBuf.writeByte((byte) ((value & 0x7F) | 0x80));
-			byteBuf.writeByte((byte) (value >>> 7 | 0x80));
-			byteBuf.writeByte((byte) (value >>> 14 | 0x80));
-			byteBuf.writeByte((byte) (value >>> 21));
-			return;
-		}
-
-		byteBuf.writeByte((byte) ((value & 0x7F) | 0x80));
-		byteBuf.writeByte((byte) (value >>> 7 | 0x80));
-		byteBuf.writeByte((byte) (value >>> 14 | 0x80));
-		byteBuf.writeByte((byte) (value >>> 21 | 0x80));
-		byteBuf.writeByte((byte) (value >>> 28));
-	}
-
 	public static int readVarInt(ByteBuf byteBuf) {
 		int b = byteBuf.readByte();
 		int result = b & 0x7F;

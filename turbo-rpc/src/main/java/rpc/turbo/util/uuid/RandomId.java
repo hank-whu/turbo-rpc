@@ -96,7 +96,7 @@ public final class RandomId implements Serializable {
 		buffer.writeLong(random);
 	}
 
-	public String toHexStringOld() {
+	/*public String toHexStringOld() {
 		// java8 下更高效
 		byte[] bytes = ThreadLocalBytes.current();
 
@@ -116,7 +116,7 @@ public final class RandomId implements Serializable {
 		String hex = new String(bytes, 0, 24, StandardCharsets.ISO_8859_1);
 
 		return hex;
-	}
+	}*/
 
 	public String toHexString() {
 		// java9 下更高效
