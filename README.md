@@ -1,7 +1,7 @@
 # turbo-rpc
 
 **turbo-rpc 是一款速度超凡的异步响应式RPC框架.**
-# 功能特点
+## 功能特点
  - 仅支持异步调用, Service接口所有public方法返回值都必须为CompletableFuture.
  - 配置定义在Service接口上, 而非实现类上, 方法实现者和调用者都不需要引入奇奇怪怪的注解.
  - 支持REST调用.
@@ -10,7 +10,7 @@
  - 支持Filter, 可通过该机制实现 Tracing 限流限速 黑白名单 等功能.
  - 支持spring boot.
 
-# Quick Start
+## Quick Start
 
 1.定义接口
 ```java
@@ -76,3 +76,6 @@ public class HelloBootTest {
 	}
 }
 ```
+
+## turbo 技术原理
+- [如何编写高性能的 RPC 框架](https://www.jianshu.com/p/7182b8751e75) https://www.jianshu.com/p/7182b8751e75
