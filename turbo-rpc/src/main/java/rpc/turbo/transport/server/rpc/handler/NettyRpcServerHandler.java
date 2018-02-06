@@ -37,7 +37,7 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<Request> 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		super.channelActive(ctx);
-		
+
 		if (logger.isInfoEnabled()) {
 			logger.info("channelActive: " + ctx.channel());
 		}
@@ -73,7 +73,7 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<Request> 
 
 			doResponseFilter(request, response, invoker, null);
 
-			ctx.pipeline().writeAndFlush(response);
+			ctx.writeAndFlush(response, ctx.voidPromise());
 
 			return;
 		}
@@ -101,7 +101,7 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<Request> 
 				doResponseFilter(request, response, invoker, UNKNOWN);
 			}
 
-			ctx.pipeline().writeAndFlush(response);
+			ctx.writeAndFlush(response, ctx.voidPromise());
 		});
 	}
 

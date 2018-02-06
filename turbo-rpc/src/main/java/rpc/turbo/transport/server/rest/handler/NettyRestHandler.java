@@ -97,7 +97,8 @@ public class NettyRestHandler extends SimpleChannelInboundHandler<FullHttpReques
 
 			doRequestFilter(httpRequest, null);
 
-			ctx.write(new RestHttpResponse(null, httpRequest, NOT_FOUND, NOT_SUPPORT_THIS_METHOD, keepAlive));
+			ctx.write(new RestHttpResponse(null, httpRequest, NOT_FOUND, NOT_SUPPORT_THIS_METHOD, keepAlive),
+					ctx.voidPromise());
 			return;
 		}
 
@@ -113,7 +114,8 @@ public class NettyRestHandler extends SimpleChannelInboundHandler<FullHttpReques
 
 				doRequestFilter(httpRequest, null);
 
-				ctx.write(new RestHttpResponse(null, httpRequest, NOT_FOUND, NOT_SUPPORT_THIS_METHOD, keepAlive));
+				ctx.write(new RestHttpResponse(null, httpRequest, NOT_FOUND, NOT_SUPPORT_THIS_METHOD, keepAlive),
+						ctx.voidPromise());
 				return;
 			}
 
@@ -121,7 +123,7 @@ public class NettyRestHandler extends SimpleChannelInboundHandler<FullHttpReques
 
 			if (!allowHandle) {
 				ctx.write(new RestHttpResponse(invoker, httpRequest, SERVICE_UNAVAILABLE,
-						RestServerFilter.SERVER_FILTER_DENY, keepAlive));
+						RestServerFilter.SERVER_FILTER_DENY, keepAlive), ctx.voidPromise());
 
 				return;
 			}
@@ -137,7 +139,7 @@ public class NettyRestHandler extends SimpleChannelInboundHandler<FullHttpReques
 				}
 
 				ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, ONLY_SUPPORT_GET_POST,
-						keepAlive));
+						keepAlive), ctx.voidPromise());
 				return;
 			}
 
@@ -155,7 +157,8 @@ public class NettyRestHandler extends SimpleChannelInboundHandler<FullHttpReques
 				logger.warn(uri + " error ", e);
 			}
 
-			ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, e, keepAlive));
+			ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, e, keepAlive),
+					ctx.voidPromise());
 			return;
 		}
 
@@ -164,17 +167,20 @@ public class NettyRestHandler extends SimpleChannelInboundHandler<FullHttpReques
 				logger.warn("unknown error " + toString(httpRequest));
 			}
 
-			ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, UNKNOWN, keepAlive));
+			ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, UNKNOWN, keepAlive),
+					ctx.voidPromise());
 			return;
 		}
 
 		future.whenComplete((result, throwable) -> {
 			if (result != null) {
-				ctx.write(new RestHttpResponse(invoker, httpRequest, OK, result, keepAlive));
+				ctx.write(new RestHttpResponse(invoker, httpRequest, OK, result, keepAlive), ctx.voidPromise());
 			} else if (throwable != null) {
-				ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, throwable, keepAlive));
+				ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, throwable, keepAlive),
+						ctx.voidPromise());
 			} else {
-				ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, UNKNOWN, keepAlive));
+				ctx.write(new RestHttpResponse(invoker, httpRequest, INTERNAL_SERVER_ERROR, UNKNOWN, keepAlive),
+						ctx.voidPromise());
 			}
 		});
 	}

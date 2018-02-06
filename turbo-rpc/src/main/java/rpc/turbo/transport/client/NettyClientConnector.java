@@ -69,7 +69,7 @@ final class NettyClientConnector implements Closeable {
 		Objects.requireNonNull(request, "request is null");
 
 		Channel channel = channels[channelIndex];
-		channel.writeAndFlush(request);
+		channel.writeAndFlush(request, channel.voidPromise());
 	}
 
 	void connect() throws InterruptedException {
