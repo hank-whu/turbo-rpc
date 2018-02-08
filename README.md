@@ -79,3 +79,4 @@ public class HelloBootTest {
 
 ## turbo 技术原理
 - [如何编写高性能的 RPC 框架](https://www.jianshu.com/p/7182b8751e75) 
+- [RPC 异步响应式调用](https://www.jianshu.com/p/1e406ffa5f90)
