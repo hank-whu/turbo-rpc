@@ -1,5 +1,7 @@
 package rpc.turbo.util.concurrent;
 
+import static rpc.turbo.util.TableUtils.offset;
+import static rpc.turbo.util.TableUtils.tableSizeFor;
 import static rpc.turbo.util.UnsafeUtils.unsafe;
 
 import java.util.Arrays;
@@ -51,7 +53,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 			return false;
 		}
 
-		Object value = unsafe().getObjectVolatile(finalArray, offset(key));
+		Object value = unsafe().getObjectVolatile(finalArray, offset(ABASE, ASHIFT, key));
 
 		if (value == NOT_FOUND) {
 			return false;
@@ -76,7 +78,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 			return null;
 		}
 
-		Object value = unsafe().getObjectVolatile(finalArray, offset(key));
+		Object value = unsafe().getObjectVolatile(finalArray, offset(ABASE, ASHIFT, key));
 
 		if (value != NOT_FOUND) {
 			return (T) value;
@@ -97,7 +99,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 		if (key >= finalArray.length) {
 			value = NOT_FOUND;
 		} else {
-			value = unsafe().getObjectVolatile(finalArray, offset(key));
+			value = unsafe().getObjectVolatile(finalArray, offset(ABASE, ASHIFT, key));
 		}
 
 		if (value != NOT_FOUND) {
@@ -107,7 +109,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 		synchronized (this) {
 			final Object[] theArray = array;
 			if (key < theArray.length) {
-				value = unsafe().getObjectVolatile(theArray, offset(key));
+				value = unsafe().getObjectVolatile(theArray, offset(ABASE, ASHIFT, key));
 			}
 
 			if (value != NOT_FOUND) {
@@ -116,9 +118,9 @@ public class ConcurrentIntToObjectArrayMap<T> {
 
 			value = producer.get();
 			put(key, (T) value);
-		}
 
-		return (T) value;
+			return (T) value;
+		}
 	}
 
 	/**
@@ -127,7 +129,6 @@ public class ConcurrentIntToObjectArrayMap<T> {
 	 *            大于零，小于256k
 	 * 
 	 * @param value
-	 *            不为null
 	 */
 	public void put(int key, T value) {
 		if (key < 0) {
@@ -138,13 +139,18 @@ public class ConcurrentIntToObjectArrayMap<T> {
 			throw new IndexOutOfBoundsException("Illegal key: " + key);
 		}
 
-		if (value == null) {
-			throw new IllegalArgumentException("Illegal value: " + value);
-		}
-
 		ensureCapacity(key + 1);
+		final long offset = offset(ABASE, ASHIFT, key);
 
-		unsafe().putOrderedObject(array, offset(key), value);
+		for (;;) {// like cas
+			final Object[] before = array;
+			unsafe().putOrderedObject(before, offset, value);
+			final Object[] after = array;
+
+			if (before == after) {
+				return;
+			}
+		}
 	}
 
 	public void clear() {
@@ -185,20 +191,6 @@ public class ConcurrentIntToObjectArrayMap<T> {
 
 			array = objs;
 		}
-	}
-
-	private static final long offset(int key) {
-		return ((long) key << ASHIFT) + ABASE;
-	}
-
-	private static final int tableSizeFor(int cap) {
-		int n = cap - 1;
-		n |= n >>> 1;
-		n |= n >>> 2;
-		n |= n >>> 4;
-		n |= n >>> 8;
-		n |= n >>> 16;
-		return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
 	}
 
 	static {

@@ -1,5 +1,7 @@
 package rpc.turbo.util.concurrent;
 
+import static rpc.turbo.util.TableUtils.offset;
+import static rpc.turbo.util.TableUtils.tableSizeFor;
 import static rpc.turbo.util.UnsafeUtils.unsafe;
 
 import java.util.Arrays;
@@ -51,7 +53,7 @@ public class ConcurrentIntToIntArrayMap {
 			return false;
 		}
 
-		int value = unsafe().getIntVolatile(finalArray, offset(key));
+		int value = unsafe().getIntVolatile(finalArray, offset(ABASE, ASHIFT, key));
 
 		if (value == NOT_FOUND) {
 			return false;
@@ -75,7 +77,7 @@ public class ConcurrentIntToIntArrayMap {
 			return NOT_FOUND;
 		}
 
-		int value = unsafe().getIntVolatile(finalArray, offset(key));
+		int value = unsafe().getIntVolatile(finalArray, offset(ABASE, ASHIFT, key));
 		return value;
 	}
 
@@ -95,9 +97,9 @@ public class ConcurrentIntToIntArrayMap {
 
 			value = producer.getAsInt();
 			put(key, value);
-		}
 
-		return value;
+			return value;
+		}
 	}
 
 	/**
@@ -122,8 +124,17 @@ public class ConcurrentIntToIntArrayMap {
 		}
 
 		ensureCapacity(key + 1);
+		final long offset = offset(ABASE, ASHIFT, key);
 
-		unsafe().putOrderedInt(array, offset(key), value);
+		for (;;) {// like cas
+			final int[] before = array;
+			unsafe().putOrderedInt(before, offset, value);
+			final int[] after = array;
+
+			if (before == after) {
+				return;
+			}
+		}
 	}
 
 	public void clear() {
@@ -166,22 +177,6 @@ public class ConcurrentIntToIntArrayMap {
 
 			array = ints;
 		}
-	}
-
-	private static final long offset(int key) {
-		return ((long) key << ASHIFT) + ABASE;
-	}
-
-	private static final int tableSizeFor(int cap) {
-		int n = cap - 1;
-
-		n |= n >>> 1;
-		n |= n >>> 2;
-		n |= n >>> 4;
-		n |= n >>> 8;
-		n |= n >>> 16;
-
-		return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
 	}
 
 	static {

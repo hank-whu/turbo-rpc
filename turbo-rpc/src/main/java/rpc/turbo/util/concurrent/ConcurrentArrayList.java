@@ -1,5 +1,6 @@
 package rpc.turbo.util.concurrent;
 
+import static rpc.turbo.util.TableUtils.tableSizeFor;
 import static rpc.turbo.util.UnsafeUtils.unsafe;
 
 import java.lang.reflect.Field;
@@ -40,8 +41,17 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 	}
 
 	public void add(T value) {
-		int index = insertIndex();
-		values[index] = value;
+		final int index = insertIndex();
+
+		for (;;) {// like cas
+			final Object[] before = values;
+			before[index] = value;
+			final Object[] after = values;
+
+			if (before == after) {
+				return;
+			}
+		}
 	}
 
 	public void addAll(Collection<T> collection) {
@@ -64,7 +74,16 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 
 	public void set(int index, T value) {
 		Objects.checkIndex(index, size);
-		values[index] = value;
+
+		for (;;) {// like cas
+			final Object[] before = values;
+			before[index] = value;
+			final Object[] after = values;
+
+			if (before == after) {
+				return;
+			}
+		}
 	}
 
 	public int size() {
@@ -124,16 +143,6 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 		}
 	}
 
-	private static final int tableSizeFor(int cap) {
-		int n = cap - 1;
-		n |= n >>> 1;
-		n |= n >>> 2;
-		n |= n >>> 4;
-		n |= n >>> 8;
-		n |= n >>> 16;
-		return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
-	}
-
 	static {
 		try {
 			Field field = ConcurrentArrayList.class.getDeclaredField("size");
@@ -151,7 +160,7 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 		}
 
 		for (int i = 0; i < 1024; i++) {
-			System.out.println(list.get(i));
+			System.out.println(i + ":" + list.get(i));
 		}
 
 	}
