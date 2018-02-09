@@ -1,7 +1,11 @@
 package rpc.turbo.serialization.protostuff;
 
+import static rpc.turbo.util.concurrent.AttachmentThreadUtils.getOrUpdate;
+import static rpc.turbo.util.concurrent.AttachmentThreadUtils.nextVarIndex;
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import io.netty.buffer.ByteBuf;
 import io.protostuff.Schema;
@@ -15,6 +19,9 @@ import rpc.turbo.param.MethodParam;
 import rpc.turbo.protocol.Request;
 import rpc.turbo.protocol.Response;
 import rpc.turbo.protocol.ResponseStatus;
+import rpc.turbo.protocol.recycle.RecycleRequest;
+import rpc.turbo.protocol.recycle.RecycleResponse;
+import rpc.turbo.protocol.recycle.RecycleUtils;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.serialization.TracerSerializer;
 import rpc.turbo.trace.Tracer;
@@ -39,6 +46,12 @@ public class ProtostuffSerializer extends Serializer {
 
 	private static final TracerSerializer tracerSerializer = new TracerSerializer();
 
+	private static final int OUTPUT_ATTACHMENT_INDEX = nextVarIndex();
+	private static final int INPUT_ATTACHMENT_INDEX = nextVarIndex();
+
+	private static final Supplier<ByteBufOutput> OUTPUT_SUPPLIER = () -> new ByteBufOutput(null);
+	private static final Supplier<ByteBufInput> INPUT_SUPPLIER = () -> new ByteBufInput(null, true);
+
 	public void writeRequest(ByteBuf byteBuf, Request request) throws IOException {
 		final int beginWriterIndex = byteBuf.writerIndex();
 
@@ -47,16 +60,17 @@ public class ProtostuffSerializer extends Serializer {
 		ByteBufUtils.writeVarInt(byteBuf, request.getServiceId());
 		tracerSerializer.write(byteBuf, request.getTracer());
 
+		ByteBufOutput output = getOrUpdate(OUTPUT_ATTACHMENT_INDEX, OUTPUT_SUPPLIER);
+		output.setByteBuf(byteBuf);
+
 		if (request.getMethodParam() == null) {
-			ByteBufOutput output = new ByteBufOutput(byteBuf);
 			emptyMethodParamSchema.writeTo(output, null);
 		} else {
-			// serviceId为服务端概念，相同的方法在不同的服务端serviceId会不相同，所以没法直接使用serviceId获取schema
-			// 如果能够证明这里比较慢，可以考虑在request中加入methodId，这个在客户端是唯一的
+			// serviceId 为服务端概念，相同的方法在不同的服务端 serviceId 会不相同，所以没法直接使用 serviceId 获取 schema
+			// 如果能够证明这里比较慢，可以考虑在 request 中加入 methodId，这个在客户端是唯一的
 			Class<? extends MethodParam> clazz = request.getMethodParam().getClass();
 			Schema<MethodParam> schema = schema(clazz);
 
-			ByteBufOutput output = new ByteBufOutput(byteBuf);
 			schema.writeTo(output, request.getMethodParam());
 		}
 
@@ -64,6 +78,8 @@ public class ProtostuffSerializer extends Serializer {
 		int length = finishWriterIndex - beginWriterIndex - TurboConstants.HEADER_FIELD_LENGTH;
 
 		byteBuf.setInt(beginWriterIndex, length);
+
+		RecycleUtils.release(request);
 	}
 
 	public Request readRequest(ByteBuf byteBuf) throws IOException {
@@ -73,16 +89,14 @@ public class ProtostuffSerializer extends Serializer {
 
 		Schema<MethodParam> schema = schema(serviceId);
 
-		ByteBufInput input = new ByteBufInput(byteBuf, true);
+		ByteBufInput input = getOrUpdate(INPUT_ATTACHMENT_INDEX, INPUT_SUPPLIER);
+		input.setByteBuf(byteBuf, true);
+
 		MethodParam methodParam = schema.newMessage();
 
 		schema.mergeFrom(input, methodParam);
 
-		Request request = new Request();
-		request.setRequestId(requestId);
-		request.setServiceId(serviceId);
-		request.setTracer(tracer);
-		request.setMethodParam(methodParam);
+		Request request = RecycleRequest.newInstance(requestId, serviceId, tracer, methodParam);
 
 		return request;
 	}
@@ -91,7 +105,8 @@ public class ProtostuffSerializer extends Serializer {
 		int beginWriterIndex = byteBuf.writerIndex();
 		byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
 
-		ByteBufOutput output = new ByteBufOutput(byteBuf);
+		ByteBufOutput output = getOrUpdate(OUTPUT_ATTACHMENT_INDEX, OUTPUT_SUPPLIER);
+		output.setByteBuf(byteBuf);
 
 		final int statusWriterIndex = byteBuf.writerIndex();
 
@@ -111,12 +126,15 @@ public class ProtostuffSerializer extends Serializer {
 		int length = finishWriterIndex - beginWriterIndex - TurboConstants.HEADER_FIELD_LENGTH;
 
 		byteBuf.setInt(beginWriterIndex, length);
+
+		RecycleUtils.release(response);
 	}
 
 	public Response readResponse(ByteBuf byteBuf) throws IOException {
-		ByteBufInput input = new ByteBufInput(byteBuf, true);
+		ByteBufInput input = getOrUpdate(INPUT_ATTACHMENT_INDEX, INPUT_SUPPLIER);
+		input.setByteBuf(byteBuf, true);
 
-		Response response = new Response();
+		Response response = RecycleResponse.newInstance(0, (byte) 0, null, null);
 		responseSchema.mergeFrom(input, response);
 
 		return response;

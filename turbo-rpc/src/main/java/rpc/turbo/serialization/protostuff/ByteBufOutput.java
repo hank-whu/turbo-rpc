@@ -34,6 +34,10 @@ public final class ByteBufOutput implements Output {
 		this.byteBuf = buffer;
 	}
 
+	public void setByteBuf(ByteBuf buffer) {
+		this.byteBuf = buffer;
+	}
+
 	public ByteBuf getByteBuf() {
 		return byteBuf;
 	}

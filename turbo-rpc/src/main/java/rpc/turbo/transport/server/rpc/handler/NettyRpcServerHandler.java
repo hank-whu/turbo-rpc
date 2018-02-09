@@ -19,6 +19,7 @@ import rpc.turbo.invoke.ServerInvokerFactory;
 import rpc.turbo.protocol.Request;
 import rpc.turbo.protocol.Response;
 import rpc.turbo.protocol.ResponseStatus;
+import rpc.turbo.protocol.recycle.RecycleResponse;
 
 public class NettyRpcServerHandler extends SimpleChannelInboundHandler<Request> {
 	private static final Log logger = LogFactory.getLog(NettyRpcServerHandler.class);
@@ -64,11 +65,12 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<Request> 
 
 		boolean allowHandle = doRequestFilter(request, invoker);
 
-		if (!allowHandle) {
-			Response response = new Response();
-			response.setRequestId(requestId);
+		final RecycleResponse response = RecycleResponse.newInstance(request);
 
+		if (!allowHandle) {
+			response.setRequestId(requestId);
 			response.setStatusCode(ResponseStatus.SERVER_FILTER_DENY);
+			response.setTracer(null);
 			response.setResult(RpcServerFilter.SERVER_FILTER_DENY);
 
 			doResponseFilter(request, response, invoker, null);
@@ -81,8 +83,8 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<Request> 
 		CompletableFuture<?> future = invoker.invoke(request.getMethodParam());
 
 		future.whenComplete((result, throwable) -> {
-			Response response = new Response();
 			response.setRequestId(requestId);
+			response.setTracer(null);
 
 			if (result != null) {
 				response.setStatusCode(ResponseStatus.OK);

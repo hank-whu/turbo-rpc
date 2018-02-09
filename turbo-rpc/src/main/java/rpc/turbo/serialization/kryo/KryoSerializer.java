@@ -12,6 +12,9 @@ import rpc.turbo.param.MethodParam;
 import rpc.turbo.protocol.Request;
 import rpc.turbo.protocol.Response;
 import rpc.turbo.protocol.ResponseStatus;
+import rpc.turbo.protocol.recycle.RecycleRequest;
+import rpc.turbo.protocol.recycle.RecycleResponse;
+import rpc.turbo.protocol.recycle.RecycleUtils;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.serialization.TracerSerializer;
 import rpc.turbo.trace.Tracer;
@@ -48,6 +51,8 @@ public class KryoSerializer extends Serializer {
 		int length = finishWriterIndex - beginWriterIndex - TurboConstants.HEADER_FIELD_LENGTH;
 
 		byteBuf.setInt(beginWriterIndex, length);
+
+		RecycleUtils.release(request);
 	}
 
 	public Request readRequest(ByteBuf byteBuf) throws IOException {
@@ -61,11 +66,7 @@ public class KryoSerializer extends Serializer {
 			methodParam = (MethodParam) kryoContext().readObject(byteBuf, clazz);
 		}
 
-		Request request = new Request();
-		request.setRequestId(requestId);
-		request.setServiceId(serviceId);
-		request.setTracer(tracer);
-		request.setMethodParam(methodParam);
+		Request request = RecycleRequest.newInstance(requestId, serviceId, tracer, methodParam);
 
 		return request;
 	}
@@ -97,6 +98,8 @@ public class KryoSerializer extends Serializer {
 		int length = finishWriterIndex - beginWriterIndex - TurboConstants.HEADER_FIELD_LENGTH;
 
 		byteBuf.setInt(beginWriterIndex, length);
+
+		RecycleUtils.release(response);
 	}
 
 	public Response readResponse(ByteBuf byteBuf) throws IOException {
@@ -106,11 +109,7 @@ public class KryoSerializer extends Serializer {
 
 		Object result = kryoContext().readClassAndObject(byteBuf);
 
-		Response response = new Response();
-		response.setRequestId(requestId);
-		response.setStatusCode(statusCode);
-		response.setTracer(tracer);
-		response.setResult(result);
+		Response response = RecycleResponse.newInstance(requestId, statusCode, tracer, result);
 
 		return response;
 	}

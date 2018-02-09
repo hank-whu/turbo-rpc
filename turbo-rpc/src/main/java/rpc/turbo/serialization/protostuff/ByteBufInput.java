@@ -35,14 +35,14 @@ public final class ByteBufInput implements Input {
 	private static final int TAG_TYPE_BITS = 3;
 	private static final int TAG_TYPE_MASK = (1 << TAG_TYPE_BITS) - 1;
 
-	private final ByteBuf byteBuf;
+	private ByteBuf byteBuf;
 	private int lastTag = 0;
 	private int packedLimit = 0;
 
 	/**
 	 * If true, the nested messages are group-encoded
 	 */
-	public final boolean decodeNestedMessageAsGroup;
+	private boolean decodeNestedMessageAsGroup;
 
 	/**
 	 * An input for a ByteBuffer
@@ -59,6 +59,13 @@ public final class ByteBufInput implements Input {
 
 	public ByteBuf getByteBuf() {
 		return byteBuf;
+	}
+
+	public void setByteBuf(ByteBuf buffer, boolean protostuffMessage) {
+		this.byteBuf = buffer;
+		this.decodeNestedMessageAsGroup = protostuffMessage;
+		this.lastTag = 0;
+		this.packedLimit = 0;
 	}
 
 	/**
