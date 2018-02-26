@@ -119,7 +119,7 @@ public class ConcurrentIntToIntArrayMap {
 			throw new IndexOutOfBoundsException("Illegal key: " + key);
 		}
 
-		if (value == -1) {
+		if (value == NOT_FOUND) {
 			throw new IllegalArgumentException("Illegal value: " + value);
 		}
 
@@ -135,6 +135,16 @@ public class ConcurrentIntToIntArrayMap {
 				return;
 			}
 		}
+	}
+
+	/**
+	 * 重置为未赋值
+	 * 
+	 * @param key
+	 *            大于零，小于256k
+	 */
+	public void reset(final int key) {
+		put(key, NOT_FOUND);
 	}
 
 	public void clear() {
