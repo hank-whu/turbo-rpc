@@ -153,6 +153,35 @@ public class ConcurrentIntToObjectArrayMap<T> {
 		}
 	}
 
+	/**
+	 * 重置为未赋值
+	 * 
+	 * @param key
+	 *            大于零，小于256k
+	 */
+	public void reset(int key) {
+		if (key < 0) {
+			throw new IllegalArgumentException("Illegal key: " + key);
+		}
+
+		if (key >= MAXIMUM_CAPACITY) {
+			throw new IndexOutOfBoundsException("Illegal key: " + key);
+		}
+
+		ensureCapacity(key + 1);
+		final long offset = offset(ABASE, ASHIFT, key);
+
+		for (;;) {// like cas
+			final Object[] before = array;
+			unsafe().putOrderedObject(before, offset, NOT_FOUND);
+			final Object[] after = array;
+
+			if (before == after) {
+				return;
+			}
+		}
+	}
+
 	public void clear() {
 		if (array == null) {
 			return;
