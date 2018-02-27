@@ -159,16 +159,16 @@ public class ConcurrentIntToObjectArrayMap<T> {
 	 * @param key
 	 *            大于零，小于256k
 	 */
-	public void reset(int key) {
+	public boolean remove(final int key) {
 		if (key < 0) {
-			throw new IllegalArgumentException("Illegal key: " + key);
+			return false;
 		}
 
-		if (key >= MAXIMUM_CAPACITY) {
-			throw new IndexOutOfBoundsException("Illegal key: " + key);
+		Object[] finalArray = array;
+		if (key >= finalArray.length) {
+			return false;
 		}
 
-		ensureCapacity(key + 1);
 		final long offset = offset(ABASE, ASHIFT, key);
 
 		for (;;) {// like cas
@@ -177,7 +177,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 			final Object[] after = array;
 
 			if (before == after) {
-				return;
+				return true;
 			}
 		}
 	}
