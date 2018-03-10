@@ -14,19 +14,24 @@ import java.util.function.IntSupplier;
  *
  */
 public class ConcurrentIntToIntArrayMap {
-	private static final int NOT_FOUND = -1;
+	private static final int DEFAULT_NOT_FOUND = -1;
 	private static final int MAXIMUM_CAPACITY = 1024 * 512;
 
 	private static final int ABASE;
 	private static final int ASHIFT;
 
 	private volatile int[] array;
+	private final int notFound;
 
 	public ConcurrentIntToIntArrayMap() {
 		this(16);
 	}
 
 	public ConcurrentIntToIntArrayMap(int initialCapacity) {
+		this(initialCapacity, DEFAULT_NOT_FOUND);
+	}
+
+	public ConcurrentIntToIntArrayMap(int initialCapacity, int notFound) {
 		if (initialCapacity < 2) {
 			throw new IllegalArgumentException("Illegal initial capacity: " + initialCapacity);
 		}
@@ -36,6 +41,7 @@ public class ConcurrentIntToIntArrayMap {
 		}
 
 		ensureCapacity(initialCapacity);
+		this.notFound = notFound;
 	}
 
 	/**
@@ -55,18 +61,13 @@ public class ConcurrentIntToIntArrayMap {
 
 		int value = unsafe().getIntVolatile(finalArray, offset(ABASE, ASHIFT, key));
 
-		if (value == NOT_FOUND) {
+		if (value == notFound) {
 			return false;
 		} else {
 			return true;
 		}
 	}
 
-	/**
-	 * 
-	 * @param key
-	 * @return -1 为找不到
-	 */
 	public int get(final int key) {
 		if (key < 0) {
 			throw new IllegalArgumentException("Illegal key: " + key);
@@ -74,7 +75,7 @@ public class ConcurrentIntToIntArrayMap {
 
 		final int[] finalArray = array;
 		if (key >= finalArray.length) {
-			return NOT_FOUND;
+			return notFound;
 		}
 
 		int value = unsafe().getIntVolatile(finalArray, offset(ABASE, ASHIFT, key));
@@ -84,14 +85,14 @@ public class ConcurrentIntToIntArrayMap {
 	public int getOrUpdate(int key, IntSupplier producer) {
 		int value = get(key);
 
-		if (value != NOT_FOUND) {
+		if (value != notFound) {
 			return value;
 		}
 
 		synchronized (this) {
 			value = get(key);
 
-			if (value != NOT_FOUND) {
+			if (value != notFound) {
 				return value;
 			}
 
@@ -119,7 +120,7 @@ public class ConcurrentIntToIntArrayMap {
 			throw new IndexOutOfBoundsException("Illegal key: " + key);
 		}
 
-		if (value == -1) {
+		if (value == notFound) {
 			throw new IllegalArgumentException("Illegal value: " + value);
 		}
 
@@ -137,6 +138,34 @@ public class ConcurrentIntToIntArrayMap {
 		}
 	}
 
+	/**
+	 * 重置为未赋值
+	 * 
+	 * @param key
+	 *            大于零，小于256k
+	 */
+	public boolean remove(final int key) {
+		if (key < 0) {
+			return false;
+		}
+
+		int[] finalArray = array;
+		if (key >= finalArray.length) {
+			return false;
+		}
+
+		final long offset = offset(ABASE, ASHIFT, key);
+		for (;;) {// like cas
+			final int[] before = array;
+			unsafe().putOrderedInt(before, offset, notFound);
+			final int[] after = array;
+
+			if (before == after) {
+				return true;
+			}
+		}
+	}
+
 	public void clear() {
 		if (array == null) {
 			return;
@@ -144,7 +173,7 @@ public class ConcurrentIntToIntArrayMap {
 
 		int[] ints = new int[16];
 		for (int i = 0; i < ints.length; i++) {
-			Arrays.fill(ints, NOT_FOUND);
+			Arrays.fill(ints, notFound);
 		}
 
 		array = ints;
@@ -169,7 +198,7 @@ public class ConcurrentIntToIntArrayMap {
 			}
 
 			int[] ints = new int[newCapacity];
-			Arrays.fill(ints, NOT_FOUND);
+			Arrays.fill(ints, notFound);
 
 			if (finalArray != null) {
 				System.arraycopy(finalArray, 0, ints, 0, finalArray.length);
@@ -195,7 +224,7 @@ public class ConcurrentIntToIntArrayMap {
 	}
 
 	public static void main(String[] args) {
-		ConcurrentIntToIntArrayMap map = new ConcurrentIntToIntArrayMap();
+		ConcurrentIntToIntArrayMap map = new ConcurrentIntToIntArrayMap(4, -100);
 		map.put(16, 16);
 
 		for (int i = 0; i < 1024; i++) {
