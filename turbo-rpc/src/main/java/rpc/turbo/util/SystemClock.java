@@ -96,12 +96,11 @@ class FastClock implements SystemClock {
 
 	static final SystemClock clock = new FastClock(1);
 
+	//删除掉无效的缓存行填充，应该使用继承的方式来引入缓存行。http://geek.csdn.net/news/detail/114619
+	
 	final long precision;
-	volatile long p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17;
 	volatile long mills;
-	volatile long q0, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17;
 	volatile long seconds;
-	volatile long r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17;
 
 	FastClock(long precision) {
 		this.precision = precision;
