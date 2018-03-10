@@ -71,6 +71,92 @@ public class ByteBufUtils {
 		return result;
 	}
 
+	// 性能提升有限，一个byte的情况性能还会下降。不推荐使用
+	public static int readVarIntByInt(ByteBuf byteBuf) {
+		int readerIndex = byteBuf.readerIndex();
+		int value = byteBuf.readIntLE();
+
+		int b = value;
+		int result = b & 0x7F;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 1);
+			return result;
+		}
+
+		b = (value >> 8);
+		result |= (b & 0x7F) << 7;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 2);
+			return result;
+		}
+
+		b = (value >> 16);
+		result |= (b & 0x7F) << 14;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 3);
+			return result;
+		}
+
+		b = (value >>> 24);
+		result |= (b & 0x7F) << 21;
+
+		if ((b & 0x80) == 0) {
+			return result;
+		}
+
+		b = byteBuf.readByte();
+		result |= (b & 0x7F) << 28;
+
+		return result;
+	}
+
+	// 性能提升有限，一个byte的情况性能还会下降。不推荐使用
+	public static int readVarIntByLong(ByteBuf byteBuf) {
+		int readerIndex = byteBuf.readerIndex();
+		long value = byteBuf.readLongLE();
+
+		int b = (int) value;
+		int result = b & 0x7F;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 1);
+			return result;
+		}
+
+		b = (int) (value >> 8);
+		result |= (b & 0x7F) << 7;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 2);
+			return result;
+		}
+
+		b = (int) (value >> 16);
+		result |= (b & 0x7F) << 14;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 3);
+			return result;
+		}
+
+		b = (int) (value >> 24);
+		result |= (b & 0x7F) << 21;
+
+		if ((b & 0x80) == 0) {
+			byteBuf.readerIndex(readerIndex + 4);
+			return result;
+		}
+
+		b = (int) (value >> 32);
+		result |= (b & 0x7F) << 28;
+
+		byteBuf.readerIndex(readerIndex + 5);
+		return result;
+	}
+
 	public static void writeVarLong(ByteBuf byteBuf, long value) throws KryoException {
 		if (value >>> 7 == 0) {
 			byteBuf.writeByte((byte) value);
