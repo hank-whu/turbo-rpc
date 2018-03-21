@@ -40,8 +40,8 @@ public class ConcurrentIntToIntArrayMap {
 			throw new IndexOutOfBoundsException("Illegal initial capacity: " + initialCapacity);
 		}
 
-		ensureCapacity(initialCapacity);
 		this.notFound = notFound;
+		ensureCapacity(initialCapacity);
 	}
 
 	/**
@@ -224,7 +224,7 @@ public class ConcurrentIntToIntArrayMap {
 	}
 
 	public static void main(String[] args) {
-		ConcurrentIntToIntArrayMap map = new ConcurrentIntToIntArrayMap(4, -100);
+		ConcurrentIntToIntArrayMap map = new ConcurrentIntToIntArrayMap(4);
 		map.put(16, 16);
 
 		for (int i = 0; i < 1024; i++) {
