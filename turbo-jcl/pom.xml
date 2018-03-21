@@ -4,7 +4,7 @@
 
 	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-jcl</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-jcl</name>
