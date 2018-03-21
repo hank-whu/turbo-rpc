@@ -18,21 +18,21 @@ Maven依赖:
 <dependency>
     <groupId>com.turbo-rpc</groupId>
     <artifactId>turbo-rpc</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 </dependency>
 
 <!-- zk注册中心，可选引入 -->
 <dependency>
     <groupId>com.turbo-rpc</groupId>
     <artifactId>turbo-register-zk</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 </dependency>
 
 <!-- SpringBoot集成，可选引入 -->
 <dependency>
     <groupId>com.turbo-rpc</groupId>
     <artifactId>turbo-spring-boot-starter</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 </dependency>
 ```
 
