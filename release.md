@@ -13,6 +13,7 @@
 5. 提高 ConcurrentArrayList ConcurrentIntToIntArrayMap ConcurrentIntToObjectArrayMap 线程安全性
 6. ConcurrentIntToIntArrayMap ConcurrentIntToObjectArrayMap 添加 remove 方法
 7. 引入 netty Recycler，提高性能，降低垃圾回收压力
+8. 兼容 Java 10
 
 ----------------------------------------------
 
