@@ -2,6 +2,20 @@
 
 ----------------------------------------------
 
+## turbo-0.0.4
+发布时间: 2018-03-21
+
+更新说明: 
+1. 升级 netty 到 4.1.22.Final
+2. 升级 guava 到 24.1
+3. 升级 typesafe-config 到 1.3.3
+4. 升级 jctools 到 2.1.2
+5. 提高 ConcurrentArrayList ConcurrentIntToIntArrayMap ConcurrentIntToObjectArrayMap 线程安全性
+6. ConcurrentIntToIntArrayMap ConcurrentIntToObjectArrayMap 添加 remove 方法
+7. 引入 netty Recycler，提高性能，降低垃圾回收压力
+
+----------------------------------------------
+
 ## turbo-0.0.3
 发布时间: 2018-02-06
 
