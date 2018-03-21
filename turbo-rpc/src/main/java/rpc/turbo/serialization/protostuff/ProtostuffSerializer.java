@@ -88,13 +88,17 @@ public class ProtostuffSerializer extends Serializer {
 		Tracer tracer = tracerSerializer.read(byteBuf);
 
 		Schema<MethodParam> schema = schema(serviceId);
+		MethodParam methodParam = null;
 
-		ByteBufInput input = getOrUpdate(INPUT_ATTACHMENT_INDEX, INPUT_SUPPLIER);
-		input.setByteBuf(byteBuf, true);
+		if (EmptyMethodParam.class.equals(schema.typeClass())) {
+			methodParam = EmptyMethodParam.empty();
+		} else {
+			ByteBufInput input = getOrUpdate(INPUT_ATTACHMENT_INDEX, INPUT_SUPPLIER);
+			input.setByteBuf(byteBuf, true);
 
-		MethodParam methodParam = schema.newMessage();
-
-		schema.mergeFrom(input, methodParam);
+			methodParam = schema.newMessage();
+			schema.mergeFrom(input, methodParam);
+		}
 
 		Request request = RecycleRequest.newInstance(requestId, serviceId, tracer, methodParam);
 
