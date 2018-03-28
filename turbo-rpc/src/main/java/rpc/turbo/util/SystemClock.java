@@ -85,6 +85,27 @@ class RealTimeClock implements SystemClock {
 
 }
 
+class FastClockCacheLine0 {
+	public volatile long p0, p1, p2, p3, p4, p5, p6, p7;
+	volatile long mills;
+}
+
+class FastClockMills extends FastClockCacheLine0 {
+	volatile long mills;
+}
+
+class FastClockCacheLine1 extends FastClockMills {
+	public volatile long q0, q1, q2, q3, q4, q5, q6, q7;
+}
+
+class FastClockSeconds extends FastClockCacheLine1 {
+	volatile long seconds;
+}
+
+class FastClockCacheLine2 extends FastClockSeconds {
+	public volatile long r0, r1, r2, r3, r4, r5, r6, r7;
+}
+
 /**
  * {@link SystemClock} is a optimized substitute of
  * {@link System#currentTimeMillis()} for avoiding context switch overload.
@@ -92,15 +113,11 @@ class RealTimeClock implements SystemClock {
  * base on
  * <A>https://github.com/zhongl/jtoolkit/blob/master/common/src/main/java/com/github/zhongl/jtoolkit/SystemClock.java</A>
  */
-class FastClock implements SystemClock {
+class FastClock extends FastClockCacheLine2 implements SystemClock {
 
 	static final SystemClock clock = new FastClock(1);
 
-	//删除掉无效的缓存行填充，应该使用继承的方式来引入缓存行。http://geek.csdn.net/news/detail/114619
-	
 	final long precision;
-	volatile long mills;
-	volatile long seconds;
 
 	FastClock(long precision) {
 		this.precision = precision;
