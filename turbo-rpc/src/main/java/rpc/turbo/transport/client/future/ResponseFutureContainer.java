@@ -21,7 +21,7 @@ public final class ResponseFutureContainer implements Closeable {
 	private volatile boolean isClosing = false;
 
 	private final NonBlockingHashMapLong<FutureWithExpire<Response>> futureMap = //
-			new NonBlockingHashMapLong<>(32);
+			new NonBlockingHashMapLong<>(32, false);
 
 	public void addFuture(int requestId, CompletableFuture<Response> future) {
 		addFuture(requestId, future, TurboService.DEFAULT_TIME_OUT);
