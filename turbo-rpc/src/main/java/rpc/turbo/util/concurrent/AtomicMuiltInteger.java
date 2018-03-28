@@ -121,7 +121,7 @@ public class AtomicMuiltInteger {
 	 */
 	public void set(int index, int value) {
 		Objects.checkIndex(index, count);
-		unsafe().putIntVolatile(array, offset(index), value);
+		unsafe().putOrderedInt(array, offset(index), value);
 	}
 
 	private static final long offset(int index) {
