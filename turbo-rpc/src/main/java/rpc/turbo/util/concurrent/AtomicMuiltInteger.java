@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * 原子性操作多个int，比AtomicInteger[]节省内存并且更方便使用
+ * 原子性操作多个int
  * 
  * @author Hank
  *
@@ -16,6 +16,7 @@ public class AtomicMuiltInteger {
 	private static final int ASHIFT;
 
 	private final int[] array;
+	private final int count;
 
 	/**
 	 * 原子性操作多个int，初始值为0
@@ -40,7 +41,8 @@ public class AtomicMuiltInteger {
 			throw new IllegalArgumentException("Illegal count: " + count);
 		}
 
-		array = new int[count];
+		this.count = count;
+		array = new int[(count + 2) << 4];
 		Arrays.fill(array, initialValue);
 	}
 
@@ -51,7 +53,7 @@ public class AtomicMuiltInteger {
 	 * @return
 	 */
 	public int incrementAndGet(int index) {
-		Objects.checkIndex(index, array.length);
+		Objects.checkIndex(index, count);
 		return unsafe().getAndAddInt(array, offset(index), 1) + 1;
 	}
 
@@ -63,7 +65,7 @@ public class AtomicMuiltInteger {
 	 * @return
 	 */
 	public int addAndGet(int index, int delta) {
-		Objects.checkIndex(index, array.length);
+		Objects.checkIndex(index, count);
 		return unsafe().getAndAddInt(array, offset(index), delta) + delta;
 	}
 
@@ -74,7 +76,7 @@ public class AtomicMuiltInteger {
 	 * @return
 	 */
 	public int get(int index) {
-		Objects.checkIndex(index, array.length);
+		Objects.checkIndex(index, count);
 		return unsafe().getIntVolatile(array, offset(index));
 	}
 
@@ -86,7 +88,7 @@ public class AtomicMuiltInteger {
 	public int sum() {
 		int sum = 0;
 
-		for (int i = 0; i < array.length; i++) {
+		for (int i = 0; i < count; i++) {
 			sum += unsafe().getIntVolatile(array, offset(i));
 		}
 
@@ -106,7 +108,7 @@ public class AtomicMuiltInteger {
 	 * 重置所有位置的值为0
 	 */
 	public void resetAll() {
-		for (int i = 0; i < array.length; i++) {
+		for (int i = 0; i < count; i++) {
 			set(i, 0);
 		}
 	}
@@ -118,12 +120,12 @@ public class AtomicMuiltInteger {
 	 * @param value
 	 */
 	public void set(int index, int value) {
-		Objects.checkIndex(index, array.length);
+		Objects.checkIndex(index, count);
 		unsafe().putIntVolatile(array, offset(index), value);
 	}
 
 	private static final long offset(int index) {
-		return ((long) index << ASHIFT) + ABASE;
+		return (((long) index + 1L) << ASHIFT) + ABASE;
 	}
 
 	static {
@@ -135,7 +137,7 @@ public class AtomicMuiltInteger {
 				throw new Error("array index scale not a power of two");
 			}
 
-			ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
+			ASHIFT = 31 - Integer.numberOfLeadingZeros(scale) + 4;
 		} catch (Exception e) {
 			throw new Error(e);
 		}
