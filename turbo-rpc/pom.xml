@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -46,7 +47,6 @@
 		<version.javassist>3.22.0-GA</version.javassist>
 		<version.guava>24.1-jre</version.guava>
 		<version.typesafe-config>1.3.3</version.typesafe-config>
-		<version.jctools>2.1.2</version.jctools>
 	</properties>
 
 	<dependencies>
@@ -125,11 +125,6 @@
 			<groupId>com.typesafe</groupId>
 			<artifactId>config</artifactId>
 			<version>${version.typesafe-config}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jctools</groupId>
-			<artifactId>jctools-core</artifactId>
-			<version>${version.jctools}</version>
 		</dependency>
 
 	</dependencies>

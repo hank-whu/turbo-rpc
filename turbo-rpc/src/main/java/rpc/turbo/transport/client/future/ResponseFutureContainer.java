@@ -3,8 +3,7 @@ package rpc.turbo.transport.client.future;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-
-import org.jctools.maps.NonBlockingHashMapLong;
+import java.util.concurrent.ConcurrentHashMap;
 
 import rpc.turbo.annotation.TurboService;
 import rpc.turbo.protocol.Response;
@@ -20,8 +19,8 @@ import rpc.turbo.util.SystemClock;
 public final class ResponseFutureContainer implements Closeable {
 	private volatile boolean isClosing = false;
 
-	private final NonBlockingHashMapLong<FutureWithExpire<Response>> futureMap = //
-			new NonBlockingHashMapLong<>(32, false);
+	private final ConcurrentHashMap<Integer, FutureWithExpire<Response>> futureMap = //
+			new ConcurrentHashMap<>(32);
 
 	public void addFuture(int requestId, CompletableFuture<Response> future) {
 		addFuture(requestId, future, TurboService.DEFAULT_TIME_OUT);
@@ -72,7 +71,7 @@ public final class ResponseFutureContainer implements Closeable {
 		});
 	}
 
-	private void doExpire(long requestId, FutureWithExpire<Response> futureWithExpire) {
+	private void doExpire(int requestId, FutureWithExpire<Response> futureWithExpire) {
 		CompletableFuture<Response> future = futureWithExpire.future;
 
 		if (future.isDone()) {
