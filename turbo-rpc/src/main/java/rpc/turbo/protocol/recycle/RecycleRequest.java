@@ -4,6 +4,7 @@ import io.netty.util.Recycler;
 import io.netty.util.Recycler.Handle;
 import rpc.turbo.param.MethodParam;
 import rpc.turbo.protocol.Request;
+import rpc.turbo.recycle.Recycleable;
 import rpc.turbo.trace.Tracer;
 
 public class RecycleRequest extends Request implements Recycleable {

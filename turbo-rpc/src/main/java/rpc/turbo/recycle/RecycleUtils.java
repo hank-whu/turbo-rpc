@@ -1,4 +1,4 @@
-package rpc.turbo.protocol.recycle;
+package rpc.turbo.recycle;
 
 public class RecycleUtils {
 
@@ -7,4 +7,5 @@ public class RecycleUtils {
 			((Recycleable) obj).recycle();
 		}
 	}
+
 }

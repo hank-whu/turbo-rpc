@@ -21,7 +21,7 @@ import rpc.turbo.protocol.Response;
 import rpc.turbo.protocol.ResponseStatus;
 import rpc.turbo.protocol.recycle.RecycleRequest;
 import rpc.turbo.protocol.recycle.RecycleResponse;
-import rpc.turbo.protocol.recycle.RecycleUtils;
+import rpc.turbo.recycle.RecycleUtils;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.serialization.TracerSerializer;
 import rpc.turbo.trace.Tracer;
