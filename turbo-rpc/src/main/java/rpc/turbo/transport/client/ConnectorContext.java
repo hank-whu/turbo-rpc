@@ -278,6 +278,7 @@ final class ConnectorContext implements Weightable, Closeable {
 
 			doResponseFilter(request, response, method, serviceMethodName, throwable);
 
+			T result = (T) response.getResult();
 			RecycleUtils.release(response);
 
 			int channelIndex = channelIndex(request);
@@ -288,7 +289,7 @@ final class ConnectorContext implements Weightable, Closeable {
 				return null;
 			} else {
 				errorCounter.reset(channelIndex);
-				return (T) response.getResult();
+				return result;
 			}
 
 		});
@@ -354,6 +355,7 @@ final class ConnectorContext implements Weightable, Closeable {
 
 			doResponseFilter(request, response, method, serviceMethodName, throwable);
 
+			T result = (T) response.getResult();
 			RecycleUtils.release(response);
 
 			int channelIndex = channelIndex(request);
@@ -374,7 +376,7 @@ final class ConnectorContext implements Weightable, Closeable {
 				});
 			} else {
 				errorCounter.reset(channelIndex);
-				futureWithFailover.complete((T) response.getResult());
+				futureWithFailover.complete(result);
 			}
 		});
 

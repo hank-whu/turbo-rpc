@@ -40,6 +40,9 @@ public class RecycleRequest extends Request implements Recycleable {
 
 	@Override
 	public void recycle() {
+		setMethodParam(null);// 加快垃圾回收
+		setTracer(null);// 加快垃圾回收
+
 		handle.recycle(this);
 	}
 }

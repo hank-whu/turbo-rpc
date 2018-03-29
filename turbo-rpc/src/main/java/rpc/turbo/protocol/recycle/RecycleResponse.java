@@ -52,7 +52,9 @@ public class RecycleResponse extends Response implements Recycleable {
 			((Recycleable) request).recycle();
 		}
 
-		this.request = null;
+		this.request = null;// 加快垃圾回收
+		setResult(null);// 加快垃圾回收
+		setTracer(null);// 加快垃圾回收
 
 		handle.recycle(this);
 	}
