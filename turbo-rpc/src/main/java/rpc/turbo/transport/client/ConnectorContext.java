@@ -177,10 +177,6 @@ final class ConnectorContext implements Weightable, Closeable {
 				continue;
 			}
 
-			if (isZombie()) {
-				throw new RemoteException("this connector is zombie");
-			}
-
 			break;
 		}
 
