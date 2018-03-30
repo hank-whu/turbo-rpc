@@ -6,14 +6,14 @@ import org.apache.commons.logging.LogFactory;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import rpc.turbo.protocol.Response;
-import rpc.turbo.transport.client.future.ResponseFutureContainer;
+import rpc.turbo.transport.client.future.FutureContainer;
 
 public class TurboClientHandler extends SimpleChannelInboundHandler<Response> {
 	private static final Log logger = LogFactory.getLog(TurboClientHandler.class);
 
-	private final ResponseFutureContainer futureContainer;
+	private final FutureContainer futureContainer;
 
-	public TurboClientHandler(ResponseFutureContainer futureContainer) {
+	public TurboClientHandler(FutureContainer futureContainer) {
 		this.futureContainer = futureContainer;
 	}
 

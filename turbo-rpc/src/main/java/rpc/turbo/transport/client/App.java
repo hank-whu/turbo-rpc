@@ -43,7 +43,6 @@ public class App implements Closeable {
 
 	public static final int MAX_CONNECTOR_SELECT_TIMES = 10;
 
-	private static final long EXPIRE_PERIOD = 100;
 	private static final long HEARTBEAT_PERIOD = TimeUnit.SECONDS.toMillis(5);
 	private static final long RESCUE_PERIOD = TimeUnit.SECONDS.toMillis(5);
 
@@ -72,12 +71,9 @@ public class App implements Closeable {
 
 	/** 抢救线程 */
 	private volatile Thread rescueAndHeartbeatJobThread;
-	/** 超时检查 */
-	private volatile Thread expireCheckerJobThread;
 
 	private long lastHeartbeatTime = 0;
 	private long lastRescueTime = 0;
-	private long lastExpireTime = 0;
 
 	private volatile boolean isCloseing = false;
 
@@ -308,7 +304,7 @@ public class App implements Closeable {
 			return;
 		}
 
-		if (rescueAndHeartbeatJobThread != null || expireCheckerJobThread != null) {
+		if (rescueAndHeartbeatJobThread != null) {
 			return;
 		}
 
@@ -351,33 +347,6 @@ public class App implements Closeable {
 		_rescueAndHeartbeatJobThread.setDaemon(true);
 		_rescueAndHeartbeatJobThread.start();
 		this.rescueAndHeartbeatJobThread = _rescueAndHeartbeatJobThread;
-
-		Thread _expireCheckerJobThread = new Thread(() -> {
-			while (!isCloseing) {
-				try {
-					Thread.sleep(EXPIRE_PERIOD);
-				} catch (Exception e) {
-					break;
-				}
-
-				if (System.currentTimeMillis() - lastExpireTime > EXPIRE_PERIOD) {
-					try {
-						appForkJoinPool.submit(() -> doExpireJob()).get();
-						lastExpireTime = System.currentTimeMillis();
-					} catch (InterruptedException e) {
-						break;
-					} catch (ExecutionException e) {
-						if (logger.isWarnEnabled()) {
-							logger.warn(group + "#" + app + " doExpireJob error", e);
-						}
-					}
-				}
-			}
-		}, "expire-thread-#" + group + "#" + app);
-		_expireCheckerJobThread.setDaemon(true);
-		_expireCheckerJobThread.start();
-		this.expireCheckerJobThread = _expireCheckerJobThread;
-
 	}
 
 	public boolean isSupport(Class<?> clazz) {
@@ -665,28 +634,6 @@ public class App implements Closeable {
 				});
 	}
 
-	private void doExpireJob() {
-		if (logger.isDebugEnabled()) {
-			logger.debug(group + "#" + app + " start expire job");
-		}
-
-		activeMap//
-				.entrySet()//
-				.stream()//
-				.parallel()//
-				.forEach(kv -> {
-					ConnectorContext context = kv.getValue();
-
-					try {
-						context.doExpireJob();
-					} catch (Exception e) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("doExpireJob error: " + group + "#" + app + " " + context.serverAddress, e);
-						}
-					}
-				});
-	}
-
 	/**
 	 * 获取远程服务id
 	 * 
@@ -772,7 +719,6 @@ public class App implements Closeable {
 			}
 		});
 
-		expireCheckerJobThread.interrupt();
 		rescueAndHeartbeatJobThread.interrupt();
 
 		activeMap.clear();
