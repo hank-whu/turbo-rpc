@@ -68,8 +68,13 @@ final class ConnectorContext implements Weightable, Closeable {
 		this.serverAddress = serverAddress;
 
 		this.errorCounter = new AtomicMuiltInteger(connectCount);
-		this.requestWaitSemaphore = new Semaphore(appConfig.getMaxRequestWait());
-
+		
+		if (appConfig.getMaxRequestWait() < 1) {
+			this.requestWaitSemaphore = null;
+		} else {
+			this.requestWaitSemaphore = new Semaphore(appConfig.getMaxRequestWait());
+		}
+		
 		this.globalTimeout = appConfig.getGlobalTimeout();
 
 		this.filters = filters;
@@ -106,7 +111,9 @@ final class ConnectorContext implements Weightable, Closeable {
 					futureContainer.addFuture(requestId, future, TurboService.DEFAULT_TIME_OUT);
 
 					try {
-						requestWaitSemaphore.acquire();
+						if (requestWaitSemaphore != null) {
+							requestWaitSemaphore.acquire();
+						}
 
 						boolean allowSend = doRequestFilter(request, heartbeatMethod, heartbeatServiceMethodName);
 						if (allowSend) {
@@ -198,7 +205,9 @@ final class ConnectorContext implements Weightable, Closeable {
 		futureContainer.addFuture(requestId, future, timeout);
 
 		try {
-			requestWaitSemaphore.acquire();
+			if (requestWaitSemaphore != null) {
+				requestWaitSemaphore.acquire();
+			}
 
 			boolean allowSend = doRequestFilter(request);
 			if (allowSend) {
@@ -246,7 +255,9 @@ final class ConnectorContext implements Weightable, Closeable {
 		}
 
 		return future.handle((response, throwable) -> {
-			requestWaitSemaphore.release();
+			if (requestWaitSemaphore != null) {
+				requestWaitSemaphore.release();
+			}
 
 			boolean error = false;
 			if (throwable != null) {
@@ -324,7 +335,9 @@ final class ConnectorContext implements Weightable, Closeable {
 		CompletableFuture<T> futureWithFailover = new CompletableFuture<>();
 
 		future.whenComplete((response, throwable) -> {
-			requestWaitSemaphore.release();
+			if (requestWaitSemaphore != null) {
+				requestWaitSemaphore.release();
+			}
 
 			boolean error = false;
 			if (throwable != null) {

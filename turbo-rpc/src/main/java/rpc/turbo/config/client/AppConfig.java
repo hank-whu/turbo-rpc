@@ -28,7 +28,7 @@ public class AppConfig {
 	private String app = TurboService.DEFAULT_APP;
 	private Serializer serializer = DEFAULT_SERIALIZER;
 	private int globalTimeout = 0;
-	private int maxRequestWait = 10000;
+	private int maxRequestWait = 0;
 	private int connectPerServer = 1;
 	private int serverErrorThreshold = 16;
 	private int connectErrorThreshold = 2 * serverErrorThreshold / connectPerServer;
