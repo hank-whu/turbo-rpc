@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -213,7 +214,7 @@ public class App implements Closeable {
 						if (isCloseing) {
 							return;
 						}
-						
+
 						changed.set(true);
 						HostPort serverAddress = kv.getKey();
 
@@ -254,7 +255,7 @@ public class App implements Closeable {
 		if (isCloseing) {
 			return;
 		}
-		
+
 		ConnectorContext context = new ConnectorContext(eventLoopGroup, appConfig, appConfig.getSerializer(), filters,
 				serverAddress);
 
@@ -291,7 +292,7 @@ public class App implements Closeable {
 		if (isCloseing) {
 			return;
 		}
-		
+
 		if (context == null) {
 			return;
 		}
@@ -306,7 +307,7 @@ public class App implements Closeable {
 		if (isCloseing) {
 			return;
 		}
-		
+
 		if (rescueAndHeartbeatJobThread != null || expireCheckerJobThread != null) {
 			return;
 		}
@@ -491,7 +492,8 @@ public class App implements Closeable {
 				}
 
 				connectorContext = router.selectConnector();
-			} else if (connectorContext.isZombie()) {
+			} else if (ThreadLocalRandom.current().nextInt(100) < 20 //
+					&& connectorContext.isZombie()) {
 				kill(connectorContext);
 				connectorContext = router.selectConnector();
 			} else {
@@ -569,7 +571,7 @@ public class App implements Closeable {
 		if (isCloseing) {
 			return;
 		}
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug(group + "#" + app + " start heartbeat");
 		}
@@ -582,7 +584,7 @@ public class App implements Closeable {
 					if (isCloseing) {
 						return;
 					}
-					
+
 					HostPort serverAddress = kv.getKey();
 					ConnectorContext context = kv.getValue();
 
@@ -605,7 +607,7 @@ public class App implements Closeable {
 		if (isCloseing) {
 			return;
 		}
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug(group + "#" + app + " start rescue zombies");
 		}
@@ -626,7 +628,7 @@ public class App implements Closeable {
 					if (isCloseing) {
 						return;
 					}
-					
+
 					HostPort serverAddress = kv.getKey();
 					ConnectorContext context = kv.getValue();
 
