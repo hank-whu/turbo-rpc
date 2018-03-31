@@ -8,7 +8,7 @@
 更新说明: 
 1. FastClock AtomicMuiltInteger 引入缓存行填充
 2. 最大在途请求数可以配置为不做任何限制，以减少锁竞争
-3. 消除 FutureContainer 的锁竞争，使用 IntObjectHashMap 替换掉 ConcurrentHashMap
+3. 消除 FutureContainer 的锁竞争，使用 IntObjectHashMap 替换掉 NonBlockingHashMapLong
 4. 删除 jctools 依赖
 5. 升级 kryo 到 4.0.2
 
