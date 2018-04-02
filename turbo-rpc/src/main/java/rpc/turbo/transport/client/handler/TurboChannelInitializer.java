@@ -22,7 +22,7 @@ public class TurboChannelInitializer extends ChannelInitializer<SocketChannel> {
 
 		ch.pipeline()//
 				.addLast("encoder", new RequestEncoder(serializer, futureContainer))//
-				.addLast("decoder", new ResponseDecoder(TurboConstants.MAX_FRAME_LENGTH, serializer))//
+				.addLast("decoder", new ResponseDecoder(TurboConstants.MAX_FRAME_LENGTH, serializer, futureContainer))//
 				.addLast("handler", new TurboClientHandler(futureContainer));
 	}
 }

@@ -41,6 +41,8 @@ public class TurboClientHandler extends SimpleChannelInboundHandler<Response> {
 		}
 
 		ctx.channel().close();
+
+		this.futureContainer.close();
 	}
 
 }
