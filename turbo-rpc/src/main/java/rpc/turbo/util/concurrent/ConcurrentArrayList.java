@@ -1,5 +1,6 @@
 package rpc.turbo.util.concurrent;
 
+import static rpc.turbo.util.TableUtils.offset;
 import static rpc.turbo.util.TableUtils.tableSizeFor;
 import static rpc.turbo.util.UnsafeUtils.unsafe;
 
@@ -20,6 +21,8 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 	public static final int MAXIMUM_CAPACITY = 1 << 30;
 
 	private static final long SIZE_OFFSET;
+	private static final int ABASE;
+	private static final int ASHIFT;
 
 	private volatile Object[] values;
 	private volatile int size;// unsafe atomic operate
@@ -42,10 +45,11 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 
 	public void add(T value) {
 		final int index = insertIndex();
+		final long offset = offset(ABASE, ASHIFT, index);
 
 		for (;;) {// like cas
 			final Object[] before = values;
-			before[index] = value;
+			unsafe().putOrderedObject(before, offset, value);
 			final Object[] after = values;
 
 			if (before == after) {
@@ -69,15 +73,16 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 	@SuppressWarnings("unchecked")
 	public T get(int index) {
 		Objects.checkIndex(index, size);
-		return (T) values[index];
+		return (T) unsafe().getObjectVolatile(values, offset(ABASE, ASHIFT, index));
 	}
 
 	public void set(int index, T value) {
 		Objects.checkIndex(index, size);
+		final long offset = offset(ABASE, ASHIFT, index);
 
 		for (;;) {// like cas
 			final Object[] before = values;
-			before[index] = value;
+			unsafe().putOrderedObject(before, offset, value);
 			final Object[] after = values;
 
 			if (before == after) {
@@ -94,15 +99,12 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 		size = 0;
 	}
 
-	@SuppressWarnings("unchecked")
 	public ArrayList<T> toArrayList() {
 		int finalSize = size;
-		Object[] finalValues = values;
-
 		ArrayList<T> list = new ArrayList<>(finalSize);
 
 		for (int i = 0; i < finalSize; i++) {
-			list.add((T) finalValues[i]);
+			list.add(get(i));
 		}
 
 		return list;
@@ -147,6 +149,15 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 		try {
 			Field field = ConcurrentArrayList.class.getDeclaredField("size");
 			SIZE_OFFSET = unsafe().objectFieldOffset(field);
+
+			ABASE = unsafe().arrayBaseOffset(Object[].class);
+
+			int scale = unsafe().arrayIndexScale(Object[].class);
+			if ((scale & (scale - 1)) != 0) {
+				throw new Error("array index scale not a power of two");
+			}
+
+			ASHIFT = 31 - Integer.numberOfLeadingZeros(scale);
 		} catch (Throwable e) {
 			throw new Error(e);
 		}
@@ -157,6 +168,14 @@ public class ConcurrentArrayList<T> implements RandomAccess {
 
 		for (int i = 0; i < 1024; i++) {
 			list.add(i);
+		}
+
+		for (int i = 0; i < 1024; i++) {
+			System.out.println(i + ":" + list.get(i));
+		}
+
+		for (int i = 0; i < 1024; i++) {
+			list.set(i, i + 10000);
 		}
 
 		for (int i = 0; i < 1024; i++) {
