@@ -26,8 +26,10 @@ public class EventLoopGroupHolder {
 	static {
 		if (Epoll.isAvailable()) {
 			eventLoopGroup = new EpollEventLoopGroup(NIO_THREAD_COUNT);
+			((EpollEventLoopGroup) eventLoopGroup).setIoRatio(99);
 		} else {
 			eventLoopGroup = new NioEventLoopGroup(NIO_THREAD_COUNT);
+			((NioEventLoopGroup) eventLoopGroup).setIoRatio(99);
 		}
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> close(), "eventLoopGroup-close-thread"));
