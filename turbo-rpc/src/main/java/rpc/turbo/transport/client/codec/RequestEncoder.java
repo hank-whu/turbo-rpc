@@ -43,6 +43,19 @@ public class RequestEncoder extends MessageToByteEncoder<RequestWithFuture> {
 		ctx.executor().scheduleAtFixedRate(//
 				() -> futureContainer.doExpireJob(1), //
 				EXPIRE_PERIOD, EXPIRE_PERIOD, TimeUnit.MILLISECONDS);
+
+		if (logger.isInfoEnabled()) {
+			logger.info("channel connect: " + ctx.channel());
+		}
+	}
+
+	@Override
+	public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+		super.disconnect(ctx, promise);
+
+		if (logger.isInfoEnabled()) {
+			logger.info("channel disconnect: " + ctx.channel());
+		}
 	}
 
 	@Override
@@ -50,6 +63,10 @@ public class RequestEncoder extends MessageToByteEncoder<RequestWithFuture> {
 		super.close(ctx, promise);
 
 		futureContainer.close();
+
+		if (logger.isInfoEnabled()) {
+			logger.info("channel close: " + ctx.channel());
+		}
 	}
 
 	@Override

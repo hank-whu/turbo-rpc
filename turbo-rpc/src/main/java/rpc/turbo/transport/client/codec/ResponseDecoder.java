@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import rpc.turbo.config.TurboConstants;
+import rpc.turbo.protocol.Response;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.transport.client.future.FutureContainer;
 
@@ -28,7 +29,8 @@ public class ResponseDecoder extends LengthFieldBasedFrameDecoder {
 
 		if (buffer != null) {
 			try {
-				return serializer.readResponse(buffer);
+				Response response = serializer.readResponse(buffer);
+				futureContainer.notifyResponse(response);
 			} finally {
 				buffer.release();
 			}

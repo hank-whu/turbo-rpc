@@ -1,8 +1,9 @@
 package rpc.turbo.transport.client.handler;
 
+import static rpc.turbo.config.TurboConstants.MAX_FRAME_LENGTH;
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import rpc.turbo.config.TurboConstants;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.transport.client.codec.RequestEncoder;
 import rpc.turbo.transport.client.codec.ResponseDecoder;
@@ -18,11 +19,10 @@ public class TurboChannelInitializer extends ChannelInitializer<SocketChannel> {
 
 	@Override
 	public void initChannel(SocketChannel ch) throws Exception {
-		FutureContainer futureContainer = new FutureContainer();
+		FutureContainer container = new FutureContainer();
+		RequestEncoder encoder = new RequestEncoder(serializer, container);
+		ResponseDecoder decoder = new ResponseDecoder(MAX_FRAME_LENGTH, serializer, container);
 
-		ch.pipeline()//
-				.addLast("encoder", new RequestEncoder(serializer, futureContainer))//
-				.addLast("decoder", new ResponseDecoder(TurboConstants.MAX_FRAME_LENGTH, serializer, futureContainer))//
-				.addLast("handler", new TurboClientHandler(futureContainer));
+		ch.pipeline().addLast("encoder", encoder).addLast("decoder", decoder);
 	}
 }
