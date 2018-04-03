@@ -77,8 +77,6 @@ final class NettyClientConnector implements Closeable {
 		bootstrap.group(eventLoopGroup);
 
 		bootstrap.option(ChannelOption.SO_REUSEADDR, true);
-		bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-
 		bootstrap.option(ChannelOption.SO_RCVBUF, 256 * 1024);
 		bootstrap.option(ChannelOption.SO_SNDBUF, 256 * 1024);
 		bootstrap.option(ChannelOption.WRITE_BUFFER_WATER_MARK, //
