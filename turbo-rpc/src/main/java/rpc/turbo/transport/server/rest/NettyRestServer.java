@@ -9,6 +9,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -44,8 +45,9 @@ public class NettyRestServer implements Closeable {
 		ServerBootstrap bootstrap = new ServerBootstrap();
 		bootstrap.group(eventLoopGroup);
 
-		bootstrap.option(ChannelOption.SO_BACKLOG, 256);
+		bootstrap.option(ChannelOption.SO_BACKLOG, 32 * 1024);
 		bootstrap.option(ChannelOption.SO_REUSEADDR, true);
+		bootstrap.option(ChannelOption.SO_RCVBUF, 256 * 1024);
 
 		if (eventLoopGroup instanceof EpollEventLoopGroup) {
 			bootstrap.option(EpollChannelOption.SO_REUSEPORT, true);
@@ -58,6 +60,12 @@ public class NettyRestServer implements Closeable {
 
 		bootstrap.childOption(ChannelOption.SO_REUSEADDR, true);
 		bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+
+		bootstrap.childOption(ChannelOption.SO_RCVBUF, 256 * 1024);
+		bootstrap.childOption(ChannelOption.SO_SNDBUF, 256 * 1024);
+		bootstrap.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, //
+				new WriteBufferWaterMark(1024 * 1024, 2048 * 1024));
+		bootstrap.childOption(ChannelOption.SO_BACKLOG, 32 * 1024);
 
 		channel = bootstrap.bind(inet).sync().channel();
 

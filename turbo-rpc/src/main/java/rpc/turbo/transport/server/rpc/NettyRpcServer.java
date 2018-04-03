@@ -47,7 +47,6 @@ public class NettyRpcServer implements Closeable {
 		bootstrap.group(eventLoopGroup);
 
 		bootstrap.option(ChannelOption.SO_REUSEADDR, true);
-
 		bootstrap.option(ChannelOption.SO_RCVBUF, 256 * 1024);
 
 		if (eventLoopGroup instanceof EpollEventLoopGroup) {
