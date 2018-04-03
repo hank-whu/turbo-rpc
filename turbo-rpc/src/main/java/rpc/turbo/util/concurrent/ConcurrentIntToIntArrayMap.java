@@ -106,7 +106,7 @@ public class ConcurrentIntToIntArrayMap {
 	/**
 	 * 
 	 * @param key
-	 *            大于零，小于256k
+	 *            大于零，小于512k
 	 * 
 	 * @param value
 	 *            大于零
@@ -142,7 +142,7 @@ public class ConcurrentIntToIntArrayMap {
 	 * 重置为未赋值
 	 * 
 	 * @param key
-	 *            大于零，小于256k
+	 *            大于零，小于512k
 	 */
 	public boolean remove(final int key) {
 		if (key < 0) {

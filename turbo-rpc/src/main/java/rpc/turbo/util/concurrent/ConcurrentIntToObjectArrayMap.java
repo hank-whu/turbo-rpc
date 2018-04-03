@@ -126,7 +126,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 	/**
 	 * 
 	 * @param key
-	 *            大于零，小于256k
+	 *            大于零，小于512k
 	 * 
 	 * @param value
 	 */
@@ -157,7 +157,7 @@ public class ConcurrentIntToObjectArrayMap<T> {
 	 * 重置为未赋值
 	 * 
 	 * @param key
-	 *            大于零，小于256k
+	 *            大于零，小于512k
 	 */
 	public boolean remove(final int key) {
 		if (key < 0) {
