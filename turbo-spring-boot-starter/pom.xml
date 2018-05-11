@@ -4,7 +4,7 @@
 
 	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-spring-boot-starter</artifactId>
-	<version>0.0.5</version>
+	<version>0.0.6</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-spring-boot-starter</name>
@@ -37,8 +37,8 @@
 		<maven.compiler.source>1.9</maven.compiler.source>
 		<maven.compiler.target>1.9</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.turbo>0.0.5</version.turbo>
-		<version.spring-boot>2.0.0.RELEASE</version.spring-boot>
+		<version.turbo>0.0.6</version.turbo>
+		<version.spring-boot>2.0.2.RELEASE</version.spring-boot>
 		<version.jsr250>1.0</version.jsr250>
 
 	</properties>
