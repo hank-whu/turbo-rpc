@@ -1,0 +1,134 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.turbo-rpc</groupId>
+	<artifactId>turbo-utils</artifactId>
+	<version>0.0.6</version>
+	<packaging>jar</packaging>
+
+	<name>turbo-utils</name>
+	<url>https://github.com/hank-whu/turbo-rpc/turbo-utils</url>
+	<description>utils</description>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/hank-whu/turbo-rpc/turbo-utils</url>
+		<connection>https://github.com/hank-whu/turbo-rpc.git</connection>
+		<developerConnection>https://github.com/hank-whu/turbo-rpc/issues</developerConnection>
+	</scm>
+
+	<developers>
+		<developer>
+			<name>hank</name>
+			<email>hank.whu@gmail.com</email>
+			<url>https://github.com/hank-whu</url>
+		</developer>
+	</developers>
+
+	<properties>
+		<maven.compiler.source>1.9</maven.compiler.source>
+		<maven.compiler.target>1.9</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<version.netty>4.1.24.Final</version.netty>
+		<version.guava>25.0-jre</version.guava>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-buffer</artifactId>
+			<version>${version.netty}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${version.guava}</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>9</source>
+					<target>9</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.0.2</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.8</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
