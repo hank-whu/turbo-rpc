@@ -11,8 +11,11 @@ import static io.protostuff.runtime.RuntimeFieldFactory.ID_SHORT;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.protostuff.CollectionSchema;
@@ -27,7 +30,8 @@ import io.protostuff.Schema;
 /**
  * The FQCN(fully qualified class name) will serve as the id (string). Does not
  * need any registration in the user-code (works out-of-the-box). The size of
- * serialized representation may be not very efficient.<br><br>
+ * serialized representation may be not very efficient.<br>
+ * <br>
  * 
  * TODO: 使用 int 作为 id；server 端扫描注册，建立链接时获取 id 列表。
  * 
@@ -35,6 +39,20 @@ import io.protostuff.Schema;
  * @author David Yu
  */
 public final class FastIdStrategy extends IdStrategy {
+
+	public static void main(String[] args) throws Exception {
+		CompletableFuture<String> future = new CompletableFuture<>();
+		System.out.println(future.getClass().getGenericSuperclass());
+
+		ParameterizedType genericReturnType = (ParameterizedType) FastIdStrategy.class.getMethod("test")
+				.getGenericReturnType();
+
+		System.out.println(genericReturnType.getActualTypeArguments()[0]);
+	}
+
+	public CompletableFuture<String> test() {
+		return CompletableFuture.completedFuture("");
+	}
 
 	final ConcurrentHashMap<String, HasSchema<?>> pojoMapping = new ConcurrentHashMap<String, HasSchema<?>>();
 
