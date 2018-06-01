@@ -63,4 +63,12 @@ public interface TurboConnectService {
 	@TurboService(version = "1.0.0", rest = "/rest/list")
 	CompletableFuture<List<String>> getRestRegisterList();
 
+	/**
+	 * 获取已注册的 classId
+	 * 
+	 * @return
+	 */
+	@TurboService(version = "1.0.0", rest = "/class-id/list")
+	CompletableFuture<Map<String, Integer>> getClassIdMap();
+
 }

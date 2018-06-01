@@ -2,6 +2,8 @@ package rpc.turbo.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +50,9 @@ public class ServerInvokerFactory {
 	private volatile FastMap<String, JavassistInvoker<?>> restInvokerMap = new FastMap<>(32, 0.5F);
 	// 高频使用
 	private final ConcurrentIntToObjectArrayMap<String> serviceMethodNameMap = new ConcurrentIntToObjectArrayMap<>();
+
+	private final AtomicInteger classIdGenerator = new AtomicInteger();
+	private final ConcurrentIntToObjectArrayMap<String> classIdMap = new ConcurrentIntToObjectArrayMap<>();
 
 	public ServerInvokerFactory(String group, String app) {
 		this.group = group;
@@ -249,6 +254,11 @@ public class ServerInvokerFactory {
 			});
 		}
 
+		// 注册classId
+		for (Method method : allMethods) {
+			registerClassId(method);
+		}
+
 		Stream<JavassistInvoker<T>> invokerStream = methodStream//
 				.map(m -> {
 					int serviceId = serviceIdCounter.getAndIncrement();
@@ -291,6 +301,27 @@ public class ServerInvokerFactory {
 	}
 
 	/**
+	 * 获取已注册的 className:id 映射
+	 * 
+	 * @return
+	 */
+	public Map<String, Integer> getClassIdMap() {
+		Map<String, Integer> registerMap = new HashMap<>();
+
+		for (int i = 0; i < classIdGenerator.get(); i++) {
+			String className = classIdMap.get(i);
+
+			if (className == null) {
+				continue;
+			}
+
+			registerMap.put(className, i);
+		}
+
+		return registerMap;
+	}
+
+	/**
 	 * 获取已注册的rest服务列表
 	 * 
 	 * @return
@@ -300,6 +331,66 @@ public class ServerInvokerFactory {
 				.stream((Iterable<String>) restInvokerMap.keys())//
 				.map(path -> restPrefix + path)//
 				.collect(Collectors.toList());
+	}
+
+	private void registerClassId(Method method) {
+		Type returnType = method.getGenericReturnType();
+		registerClassId(returnType);
+
+		Type[] genericParameterTypes = method.getGenericParameterTypes();
+		for (int i = 0; i < genericParameterTypes.length; i++) {
+			registerClassId(genericParameterTypes[i]);
+		}
+	}
+
+	private void registerClassId(Type type) {
+		if (type == null) {
+			return;
+		}
+
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			Type rawType = parameterizedType.getRawType();
+			registerClassId(rawType);
+
+			Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+			for (int i = 0; i < actualTypeArguments.length; i++) {
+				registerClassId(actualTypeArguments[i]);
+			}
+		} else if (type instanceof Class) {
+			Class<?> clazz = (Class<?>) type;
+
+			if (clazz.isInterface()) {
+				return;
+			}
+
+			if (clazz.isPrimitive()) {
+				return;
+			}
+
+			if (clazz.isArray()) {
+				return;
+			}
+
+			if (clazz.isEnum()) {
+				return;
+			}
+
+			if (clazz.isAnnotation()) {
+				return;
+			}
+
+			if (clazz.isAnonymousClass()) {
+				return;
+			}
+
+			int classId = classIdGenerator.getAndIncrement();
+			classIdMap.put(classId, clazz.getName());
+		}
+	}
+
+	public static void main(String[] args) throws Exception {
+
 	}
 
 }

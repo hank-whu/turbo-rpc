@@ -34,4 +34,10 @@ public final class TurboConnectServiceServerImpl implements TurboConnectService 
 	public CompletableFuture<List<String>> getRestRegisterList() {
 		return CompletableFuture.completedFuture(invokerFactory.getRestRegisterList());
 	}
+
+	@Override
+	public CompletableFuture<Map<String, Integer>> getClassIdMap() {
+		return CompletableFuture.completedFuture(invokerFactory.getClassIdMap());
+	}
+
 }
