@@ -6,6 +6,8 @@ import static io.protostuff.WireFormat.makeTag;
 import java.io.IOException;
 
 import io.netty.buffer.ByteBuf;
+import io.protostuff.ByteBufInput;
+import io.protostuff.ByteBufOutput;
 import io.protostuff.Input;
 import io.protostuff.Output;
 import io.protostuff.Pipe;

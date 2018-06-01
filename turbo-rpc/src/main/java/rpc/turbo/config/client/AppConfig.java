@@ -18,15 +18,12 @@ import rpc.turbo.loadbalance.LoadBalanceFactory;
 import rpc.turbo.loadbalance.RoundRobinLoadBalanceFactory;
 import rpc.turbo.loadbalance.Weightable;
 import rpc.turbo.serialization.Serializer;
-import rpc.turbo.serialization.protostuff.ProtostuffSerializer;
 
 public class AppConfig {
 
-	private static final Serializer DEFAULT_SERIALIZER = new ProtostuffSerializer();
-
 	private String group = TurboService.DEFAULT_GROUP;
 	private String app = TurboService.DEFAULT_APP;
-	private Serializer serializer = DEFAULT_SERIALIZER;
+	private Serializer serializer = null;
 	private int globalTimeout = 0;
 	private int maxRequestWait = 0;
 	private int connectPerServer = 1;
@@ -164,7 +161,7 @@ public class AppConfig {
 		int connectErrorThreshold = getIntOrElse(config, "connectErrorThreshold",
 				2 * serverErrorThreshold / connectPerServer);
 
-		String serializerClass = getStringOrElse(config, "serializer.class", ProtostuffSerializer.class.getName());
+		String serializerClass = config.getString("serializer.class");
 
 		Serializer serializer = (Serializer) Class//
 				.forName(serializerClass)//

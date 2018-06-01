@@ -38,15 +38,14 @@ public final class ByteBufOutput implements Output {
 		return byteBuf;
 	}
 
+	public void writeRawInt32(int value) throws IOException {
+		ByteBufUtils.writeVarInt(byteBuf, value);
+	}
+
 	@Override
 	public void writeInt32(int fieldNumber, int value, boolean repeated) throws IOException {
-		if (value < 0) {
-			ByteBufUtils.writeVarInt(byteBuf, makeTag(fieldNumber, WIRETYPE_VARINT));
-			ByteBufUtils.writeVarLong(byteBuf, value);
-		} else {
-			ByteBufUtils.writeVarInt(byteBuf, makeTag(fieldNumber, WIRETYPE_VARINT));
-			ByteBufUtils.writeVarInt(byteBuf, value);
-		}
+		ByteBufUtils.writeVarInt(byteBuf, makeTag(fieldNumber, WIRETYPE_VARINT));
+		ByteBufUtils.writeVarInt(byteBuf, value);
 	}
 
 	@Override
@@ -121,9 +120,37 @@ public final class ByteBufOutput implements Output {
 		byteBuf.writeByte(value ? (byte) 0x01 : 0x00);
 	}
 
+	public void writeRawBool(boolean value) throws IOException {
+		byteBuf.writeByte(value ? (byte) 0x01 : 0x00);
+	}
+
 	@Override
 	public void writeEnum(int fieldNumber, int number, boolean repeated) throws IOException {
 		writeInt32(fieldNumber, number, repeated);
+	}
+
+	public void writeRawString(String value) throws IOException {
+		if (value == null) {
+			byteBuf.writeByte(SerializationConstants.STRING_NULL);
+			return;
+		}
+
+		if (value.length() == 0) {
+			byteBuf.writeByte(SerializationConstants.STRING_EMPTY);
+			return;
+		}
+
+		byte[] bytes;
+		if (UnsafeStringUtils.isLatin1(value)) {
+			byteBuf.writeByte(SerializationConstants.STRING_LATIN1);
+			bytes = UnsafeStringUtils.getLatin1Bytes(value);
+		} else {
+			byteBuf.writeByte(SerializationConstants.STRING_UTF8);
+			bytes = value.getBytes(StandardCharsets.UTF_8);
+		}
+
+		ByteBufUtils.writeVarInt(byteBuf, bytes.length);
+		byteBuf.writeBytes(bytes, 0, bytes.length);
 	}
 
 	@Override

@@ -41,13 +41,12 @@
 
 		<version.turbo>0.0.6</version.turbo>
 		<version.protostuff>1.6.0</version.protostuff>
-		<version.netty>4.1.24.Final</version.netty>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.turbo-rpc</groupId>
-			<artifactId>turbo-utils</artifactId>
+			<artifactId>turbo-rpc</artifactId>
 			<version>${version.turbo}</version>
 		</dependency>
 		<dependency>
@@ -59,11 +58,6 @@
 			<groupId>io.protostuff</groupId>
 			<artifactId>protostuff-runtime</artifactId>
 			<version>${version.protostuff}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-buffer</artifactId>
-			<version>${version.netty}</version>
 		</dependency>
 
 	</dependencies>

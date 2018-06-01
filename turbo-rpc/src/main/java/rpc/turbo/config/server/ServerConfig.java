@@ -16,7 +16,6 @@ import rpc.turbo.config.HostPort;
 import rpc.turbo.serialization.JsonMapper;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.serialization.jackson.JacksonMapper;
-import rpc.turbo.serialization.protostuff.ProtostuffSerializer;
 
 public class ServerConfig {
 
@@ -24,7 +23,7 @@ public class ServerConfig {
 	private String app;
 	private String ownerName;
 	private String ownerPhone;
-	private Serializer serializer = new ProtostuffSerializer();
+	private Serializer serializer = null;
 	private JsonMapper jsonMapper = new JacksonMapper();
 	private List<RegisterConfig> registers;
 
@@ -117,7 +116,7 @@ public class ServerConfig {
 		String ownerName = getStringOrElse(config, "owner.name", "");
 		String ownerPhone = getStringOrElse(config, "owner.phone", "");
 
-		String serializerClass = getStringOrElse(config, "serializer.class", ProtostuffSerializer.class.getName());
+		String serializerClass = config.getString("serializer.class");
 
 		Serializer serializer;
 		try {

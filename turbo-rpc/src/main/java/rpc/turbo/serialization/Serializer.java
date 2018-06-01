@@ -1,6 +1,7 @@
 package rpc.turbo.serialization;
 
 import java.io.IOException;
+import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
 import rpc.turbo.param.MethodParam;
@@ -74,4 +75,22 @@ public abstract class Serializer {
 	 * @throws IOException
 	 */
 	public abstract Response readResponse(ByteBuf byteBuf) throws IOException;
+
+	/**
+	 * 是否支持classID
+	 * 
+	 * @return
+	 */
+	public boolean isSupportedClassId() {
+		return false;
+	}
+
+	/**
+	 * 设置classID
+	 * 
+	 * @param classIds
+	 */
+	public void setClassIds(Map<Class<?>, Integer> classIds) {
+		return;
+	}
 }
