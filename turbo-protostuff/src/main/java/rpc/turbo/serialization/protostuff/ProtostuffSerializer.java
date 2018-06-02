@@ -107,6 +107,9 @@ public class ProtostuffSerializer extends Serializer {
 
 		byteBuf.setInt(beginWriterIndex, length);
 
+		//System.out.println("request content: " + new String(ByteBufUtil.getBytes(byteBuf.duplicate())));
+		//System.out.println("request length: " + byteBuf.writerIndex());
+
 		RecycleUtils.release(request);
 	}
 
@@ -163,6 +166,10 @@ public class ProtostuffSerializer extends Serializer {
 	}
 
 	public Response readResponse(ByteBuf byteBuf) throws IOException {
+
+		//System.out.println("response content: " + new String(ByteBufUtil.getBytes(byteBuf.duplicate())));
+		//System.out.println("response length: " + byteBuf.readableBytes());
+
 		ByteBufInput input = getOrUpdate(INPUT_ATTACHMENT_INDEX, INPUT_SUPPLIER);
 		input.setByteBuf(byteBuf, true);
 
@@ -186,7 +193,8 @@ public class ProtostuffSerializer extends Serializer {
 			return schema;
 		}
 
-		schema = schemaMap.computeIfAbsent(clazz, k -> (Schema<MethodParam>) RuntimeSchema.getSchema(clazz));
+		schema = schemaMap.computeIfAbsent(clazz,
+				k -> (Schema<MethodParam>) RuntimeSchema.getSchema(clazz, fastIdStrategy));
 		return schema;
 	}
 

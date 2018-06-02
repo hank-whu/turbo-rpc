@@ -17,13 +17,12 @@ import rpc.turbo.discover.Discover;
 import rpc.turbo.loadbalance.LoadBalanceFactory;
 import rpc.turbo.loadbalance.RoundRobinLoadBalanceFactory;
 import rpc.turbo.loadbalance.Weightable;
-import rpc.turbo.serialization.Serializer;
 
 public class AppConfig {
 
 	private String group = TurboService.DEFAULT_GROUP;
 	private String app = TurboService.DEFAULT_APP;
-	private Serializer serializer = null;
+	private String serializer = "rpc.turbo.serialization.protostuff.ProtostuffSerializer";
 	private int globalTimeout = 0;
 	private int maxRequestWait = 0;
 	private int connectPerServer = 1;
@@ -48,11 +47,11 @@ public class AppConfig {
 		this.app = app;
 	}
 
-	public Serializer getSerializer() {
+	public String getSerializer() {
 		return serializer;
 	}
 
-	public void setSerializer(Serializer serializer) {
+	public void setSerializer(String serializer) {
 		this.serializer = serializer;
 	}
 
@@ -163,11 +162,6 @@ public class AppConfig {
 
 		String serializerClass = config.getString("serializer.class");
 
-		Serializer serializer = (Serializer) Class//
-				.forName(serializerClass)//
-				.getDeclaredConstructor()//
-				.newInstance();
-
 		String loadBalanceFactoryClass = getStringOrElse(config, "loadBalanceFactory.class",
 				RoundRobinLoadBalanceFactory.class.getName());
 
@@ -194,7 +188,7 @@ public class AppConfig {
 		AppConfig appConfig = new AppConfig();
 		appConfig.setGroup(group);
 		appConfig.setApp(app);
-		appConfig.setSerializer(serializer);
+		appConfig.setSerializer(serializerClass);
 		appConfig.setGlobalTimeout(globalTimeout);
 		appConfig.setMaxRequestWait(maxRequestWait);
 		appConfig.setConnectPerServer(connectPerServer);

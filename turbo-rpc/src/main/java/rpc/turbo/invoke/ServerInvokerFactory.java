@@ -52,7 +52,7 @@ public class ServerInvokerFactory {
 	private final ConcurrentIntToObjectArrayMap<String> serviceMethodNameMap = new ConcurrentIntToObjectArrayMap<>();
 
 	private final AtomicInteger classIdGenerator = new AtomicInteger();
-	private final ConcurrentIntToObjectArrayMap<String> classIdMap = new ConcurrentIntToObjectArrayMap<>();
+	private final ConcurrentMap<String, Integer> classIdMap = new ConcurrentHashMap<>();
 
 	public ServerInvokerFactory(String group, String app) {
 		this.group = group;
@@ -306,19 +306,7 @@ public class ServerInvokerFactory {
 	 * @return
 	 */
 	public Map<String, Integer> getClassIdMap() {
-		Map<String, Integer> registerMap = new HashMap<>();
-
-		for (int i = 0; i < classIdGenerator.get(); i++) {
-			String className = classIdMap.get(i);
-
-			if (className == null) {
-				continue;
-			}
-
-			registerMap.put(className, i);
-		}
-
-		return registerMap;
+		return classIdMap;
 	}
 
 	/**
@@ -384,8 +372,24 @@ public class ServerInvokerFactory {
 				return;
 			}
 
-			int classId = classIdGenerator.getAndIncrement();
-			classIdMap.put(classId, clazz.getName());
+			if (clazz.equals(CompletableFuture.class)) {
+				return;
+			}
+
+			String className = clazz.getName();
+
+			if (className.startsWith("java.lang.")) {
+				return;
+			}
+
+			if (classIdMap.containsKey(className)) {
+				return;
+			}
+
+			int classId = classIdMap//
+					.computeIfAbsent(className, key -> classIdGenerator.getAndIncrement());
+
+			logger.info("register Serializer.classId " + className + ":" + classId);
 		}
 	}
 

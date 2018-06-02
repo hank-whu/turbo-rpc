@@ -23,6 +23,8 @@ import rpc.turbo.filter.RestServerFilter;
 import rpc.turbo.filter.RpcServerFilter;
 import rpc.turbo.invoke.ServerInvokerFactory;
 import rpc.turbo.param.MethodParamClassResolver;
+import rpc.turbo.serialization.Serializer;
+import rpc.turbo.serialization.SerializerFactory;
 import rpc.turbo.transport.server.rest.NettyRestServer;
 import rpc.turbo.transport.server.rpc.NettyRpcServer;
 
@@ -35,6 +37,7 @@ public final class TurboServer implements Closeable {
 	private Map<HostPort, Closeable> serverMap = new HashMap<>();
 	private Set<Integer> portSet = new HashSet<>();
 
+	private final Serializer serializer;
 	private final ServerInvokerFactory invokerFactory;
 	private final EventLoopGroup eventLoopGroup;
 	private final ServerConfig serverConfig;
@@ -61,8 +64,10 @@ public final class TurboServer implements Closeable {
 		this.invokerFactory = invokerFactory;
 		this.eventLoopGroup = EventLoopGroupHolder.get();
 
+		this.serializer = SerializerFactory.createSerializer(serverConfig.getSerializer());
+
 		MethodParamClassResolver classResolver = new MethodParamClassResolver(invokerFactory);
-		serverConfig.getSerializer().setClassResolver(classResolver);
+		this.serializer.setClassResolver(classResolver);
 	}
 
 	/**
@@ -146,8 +151,8 @@ public final class TurboServer implements Closeable {
 	}
 
 	public NettyRpcServer startRpcServer(HostPort hostPort) throws InterruptedException {
-		NettyRpcServer nettyRpcServer = new NettyRpcServer(eventLoopGroup, invokerFactory, serverConfig.getSerializer(),
-				rpcFilters, hostPort);
+		NettyRpcServer nettyRpcServer = new NettyRpcServer(eventLoopGroup, invokerFactory, serializer, rpcFilters,
+				hostPort);
 		nettyRpcServer.start();
 		return nettyRpcServer;
 	}
@@ -181,6 +186,23 @@ public final class TurboServer implements Closeable {
 	 */
 	public void registerService(Map<Class<?>, Object> map) {
 		invokerFactory.register(map);
+
+		if (serializer.isSupportedClassId()) {
+			Map<String, Integer> classIdMap = invokerFactory.getClassIdMap();
+			Map<Class<?>, Integer> classIds = new HashMap<>();
+
+			classIdMap.forEach((className, id) -> {
+				try {
+					classIds.put(Class.forName(className), id);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+
+			serializer.setClassIds(classIds);
+
+			logger.info("register Serializer.classIds: " + classIdMap);
+		}
 	}
 
 	private void unRegisterServer() throws InterruptedException, ExecutionException {

@@ -14,7 +14,6 @@ import rpc.turbo.annotation.TurboService;
 import rpc.turbo.config.ConfigException;
 import rpc.turbo.config.HostPort;
 import rpc.turbo.serialization.JsonMapper;
-import rpc.turbo.serialization.Serializer;
 import rpc.turbo.serialization.jackson.JacksonMapper;
 
 public class ServerConfig {
@@ -23,7 +22,7 @@ public class ServerConfig {
 	private String app;
 	private String ownerName;
 	private String ownerPhone;
-	private Serializer serializer = null;
+	private String serializer = "rpc.turbo.serialization.protostuff.ProtostuffSerializer";
 	private JsonMapper jsonMapper = new JacksonMapper();
 	private List<RegisterConfig> registers;
 
@@ -67,11 +66,11 @@ public class ServerConfig {
 		this.ownerPhone = ownerPhone;
 	}
 
-	public Serializer getSerializer() {
+	public String getSerializer() {
 		return serializer;
 	}
 
-	public void setSerializer(Serializer serializer) {
+	public void setSerializer(String serializer) {
 		this.serializer = serializer;
 	}
 
@@ -117,16 +116,6 @@ public class ServerConfig {
 		String ownerPhone = getStringOrElse(config, "owner.phone", "");
 
 		String serializerClass = config.getString("serializer.class");
-
-		Serializer serializer;
-		try {
-			serializer = (Serializer) Class//
-					.forName(serializerClass)//
-					.getDeclaredConstructor()//
-					.newInstance();
-		} catch (Throwable t) {
-			throw new ConfigException(t);
-		}
 
 		String jsonMapperClass = getStringOrElse(config, "jsonMapper.class", JacksonMapper.class.getName());
 
@@ -176,7 +165,7 @@ public class ServerConfig {
 		serverConfig.setApp(app);
 		serverConfig.setOwnerName(ownerName);
 		serverConfig.setOwnerPhone(ownerPhone);
-		serverConfig.setSerializer(serializer);
+		serverConfig.setSerializer(serializerClass);
 		serverConfig.setJsonMapper(jsonMapper);
 		serverConfig.setRegisters(registers);
 
