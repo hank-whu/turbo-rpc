@@ -1,15 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.turbo-rpc</groupId>
-	<artifactId>turbo-register-zk</artifactId>
+	<artifactId>turbo-kryo</artifactId>
 	<version>0.0.7</version>
 	<packaging>jar</packaging>
 
-	<name>turbo-register-zk</name>
-	<url>https://github.com/hank-whu/turbo-rpc/turbo-register-zk</url>
-	<description>turbo zk register</description>
+	<name>turbo-kryo</name>
+	<url>https://github.com/hank-whu/turbo-rpc/turbo-kryo</url>
+	<description>kryo</description>
 
 	<licenses>
 		<license>
@@ -20,7 +21,7 @@
 	</licenses>
 
 	<scm>
-		<url>https://github.com/hank-whu/turbo-rpc/turbo-register-zk</url>
+		<url>https://github.com/hank-whu/turbo-rpc/turbo-kryo</url>
 		<connection>https://github.com/hank-whu/turbo-rpc.git</connection>
 		<developerConnection>https://github.com/hank-whu/turbo-rpc/issues</developerConnection>
 	</scm>
@@ -33,13 +34,13 @@
 		</developer>
 	</developers>
 
-
 	<properties>
 		<maven.compiler.source>1.9</maven.compiler.source>
 		<maven.compiler.target>1.9</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
 		<version.turbo>0.0.7</version.turbo>
-		<version.curator>2.12.0</version.curator>
+		<version.kryo>4.0.2</version.kryo>
 	</properties>
 
 	<dependencies>
@@ -49,10 +50,11 @@
 			<version>${version.turbo}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-recipes</artifactId>
-			<version>${version.curator}</version>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+			<version>${version.kryo}</version>
 		</dependency>
+		
 	</dependencies>
 
 	<distributionManagement>

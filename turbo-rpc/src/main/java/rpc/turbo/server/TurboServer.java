@@ -37,6 +37,8 @@ public final class TurboServer implements Closeable {
 	private Map<HostPort, Closeable> serverMap = new HashMap<>();
 	private Set<Integer> portSet = new HashSet<>();
 
+	private boolean classIdRegistered = false;
+
 	private final Serializer serializer;
 	private final ServerInvokerFactory invokerFactory;
 	private final EventLoopGroup eventLoopGroup;
@@ -151,9 +153,29 @@ public final class TurboServer implements Closeable {
 	}
 
 	public NettyRpcServer startRpcServer(HostPort hostPort) throws InterruptedException {
+		if (!classIdRegistered && serializer.isSupportedClassId()) {
+			classIdRegistered = true;
+
+			Map<String, Integer> classIdMap = invokerFactory.getClassIdMap();
+			Map<Class<?>, Integer> classIds = new HashMap<>();
+
+			classIdMap.forEach((className, id) -> {
+				try {
+					classIds.put(Class.forName(className), id);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+
+			serializer.setClassIds(classIds);
+
+			logger.info("register Serializer.classIds: " + classIdMap);
+		}
+
 		NettyRpcServer nettyRpcServer = new NettyRpcServer(eventLoopGroup, invokerFactory, serializer, rpcFilters,
 				hostPort);
 		nettyRpcServer.start();
+
 		return nettyRpcServer;
 	}
 
@@ -186,23 +208,6 @@ public final class TurboServer implements Closeable {
 	 */
 	public void registerService(Map<Class<?>, Object> map) {
 		invokerFactory.register(map);
-
-		if (serializer.isSupportedClassId()) {
-			Map<String, Integer> classIdMap = invokerFactory.getClassIdMap();
-			Map<Class<?>, Integer> classIds = new HashMap<>();
-
-			classIdMap.forEach((className, id) -> {
-				try {
-					classIds.put(Class.forName(className), id);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-
-			serializer.setClassIds(classIds);
-
-			logger.info("register Serializer.classIds: " + classIdMap);
-		}
 	}
 
 	private void unRegisterServer() throws InterruptedException, ExecutionException {

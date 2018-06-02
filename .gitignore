@@ -1,8 +1,11 @@
 # Compiled class file
 *.class
+*.bak
+*/target
 
 # Log file
 *.log
+*/logs
 
 # BlueJ files
 *.ctxt
@@ -18,12 +21,12 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+#IDE
 */.classpath
 */.factorypath
 */.project
 */.idea
 */.settings
-*/target
-*.bak
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid
