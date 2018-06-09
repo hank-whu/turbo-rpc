@@ -1,5 +1,8 @@
 package rpc.turbo.invoke;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -322,6 +325,10 @@ public class ServerInvokerFactory {
 	}
 
 	private void registerClassId(Method method) {
+		if (method == null) {
+			return;
+		}
+
 		Type returnType = method.getGenericReturnType();
 		registerClassId(returnType);
 
@@ -390,7 +397,36 @@ public class ServerInvokerFactory {
 					.computeIfAbsent(className, key -> classIdGenerator.getAndIncrement());
 
 			logger.info("register Serializer.classId " + className + ":" + classId);
+
+			Method[] childMethods = getChildMethods(clazz);
+			for (int i = 0; i < childMethods.length; i++) {
+				registerClassId(childMethods[i]);
+			}
 		}
+	}
+
+	private Method[] getChildMethods(Class<?> clazz) {
+		BeanInfo info;
+		try {
+			info = Introspector.getBeanInfo(clazz);
+		} catch (Throwable t) {
+			return new Method[0];
+		}
+
+		PropertyDescriptor[] descriptors = info.getPropertyDescriptors();
+		if (descriptors.length == 0) {
+			return new Method[0];
+		}
+
+		Method[] childMethods = new Method[descriptors.length << 1];
+
+		for (int i = 0; i < descriptors.length; i++) {
+			PropertyDescriptor descriptor = descriptors[i];
+			childMethods[i] = descriptor.getReadMethod();
+			childMethods[i << 1] = descriptor.getWriteMethod();
+		}
+
+		return childMethods;
 	}
 
 	public static void main(String[] args) throws Exception {
