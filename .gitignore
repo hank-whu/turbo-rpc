@@ -26,8 +26,8 @@
 */.factorypath
 */.project
 .project
-*/.idea
 */.settings
+.settings
 */.idea
 .idea
 
