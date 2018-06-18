@@ -26,6 +26,7 @@ import rpc.turbo.benchmark.service.UserServiceServerImpl;
 import rpc.turbo.serialization.kryo.ByteBufInput;
 import rpc.turbo.serialization.kryo.ByteBufOutput;
 import rpc.turbo.serialization.kryo.FastClassResolver;
+import rpc.turbo.serialization.kryo.FastSerializer;
 
 @State(Scope.Thread)
 public class KryoBenchmark {
@@ -46,6 +47,8 @@ public class KryoBenchmark {
 	private final Page<User> userPage = userService.listUser(0).join();
 
 	public KryoBenchmark() {
+		kryo.setDefaultSerializer(FastSerializer.class);
+		kryo.setReferences(false);
 
 		try {
 			userBuffer.clear();
@@ -111,9 +114,16 @@ public class KryoBenchmark {
 
 	public static void main(String[] args) throws Exception {
 
+		// CtClass.debugDump =
+		// "C:\\Users\\hank\\Documents\\javassist\\rpc\\turbo\\serialization\\kryo";
+		// KryoBenchmark benchmark = new KryoBenchmark();
+
+		// for (int i = 0; i < Long.MAX_VALUE; i++) {
+		// benchmark.serializeUserList();
+		// }
+
 		Options opt = new OptionsBuilder()//
 				.include(KryoBenchmark.class.getName())//
-				.include(ProtostuffBenchmark.class.getName())//
 				.warmupIterations(5)//
 				.measurementIterations(5)//
 				.threads(CONCURRENCY)//

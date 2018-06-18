@@ -125,7 +125,7 @@ public class FastClassResolver implements ClassResolver {
 		return registration;
 	}
 
-	protected void writeName(Output output, Class type, Registration registration) {
+	public void writeName(Output output, Class type, Registration registration) {
 		output.writeVarInt(NAME + 2, true);
 		if (classToNameId != null) {
 			int nameId = classToNameId.get(type, -1);

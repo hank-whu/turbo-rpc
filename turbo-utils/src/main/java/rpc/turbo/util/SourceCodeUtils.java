@@ -7,6 +7,46 @@ package rpc.turbo.util;
  *
  */
 public final class SourceCodeUtils {
+	
+	public static boolean isBoxType(Class<?> type) {
+		if (type == null) {
+			return false;
+		}
+
+		if (type == Integer.class) {
+			return true;
+		}
+
+		if (type == Long.class) {
+			return true;
+		}
+
+		if (type == Boolean.class) {
+			return true;
+		}
+
+		if (type == Double.class) {
+			return true;
+		}
+
+		if (type == Float.class) {
+			return true;
+		}
+
+		if (type == Short.class) {
+			return true;
+		}
+
+		if (type == Byte.class) {
+			return true;
+		}
+
+		if (type == Character.class) {
+			return true;
+		}
+
+		return false;
+	}
 
 	public static String forceCast(Class<?> clazz) {
 		if (int.class.equals(clazz)) {

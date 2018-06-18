@@ -46,6 +46,8 @@ public final class KryoContext {
 
 	public KryoContext() {
 		kryo = new Kryo(new FastClassResolver(), new MapReferenceResolver(), new DefaultStreamFactory());
+		kryo.setDefaultSerializer(FastSerializer.class);
+		kryo.setReferences(false);
 
 		kryo.register(int[].class);
 		kryo.register(long[].class);
