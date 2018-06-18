@@ -1,7 +1,12 @@
 package rpc.turbo.invoke;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +53,9 @@ public class ServerInvokerFactory {
 	private volatile FastMap<String, JavassistInvoker<?>> restInvokerMap = new FastMap<>(32, 0.5F);
 	// 高频使用
 	private final ConcurrentIntToObjectArrayMap<String> serviceMethodNameMap = new ConcurrentIntToObjectArrayMap<>();
+
+	private final AtomicInteger classIdGenerator = new AtomicInteger();
+	private final ConcurrentMap<String, Integer> classIdMap = new ConcurrentHashMap<>();
 
 	public ServerInvokerFactory(String group, String app) {
 		this.group = group;
@@ -249,6 +257,11 @@ public class ServerInvokerFactory {
 			});
 		}
 
+		// 注册classId
+		for (Method method : allMethods) {
+			registerClassId(method);
+		}
+
 		Stream<JavassistInvoker<T>> invokerStream = methodStream//
 				.map(m -> {
 					int serviceId = serviceIdCounter.getAndIncrement();
@@ -291,6 +304,15 @@ public class ServerInvokerFactory {
 	}
 
 	/**
+	 * 获取已注册的 className:id 映射
+	 * 
+	 * @return
+	 */
+	public Map<String, Integer> getClassIdMap() {
+		return classIdMap;
+	}
+
+	/**
 	 * 获取已注册的rest服务列表
 	 * 
 	 * @return
@@ -300,6 +322,115 @@ public class ServerInvokerFactory {
 				.stream((Iterable<String>) restInvokerMap.keys())//
 				.map(path -> restPrefix + path)//
 				.collect(Collectors.toList());
+	}
+
+	private void registerClassId(Method method) {
+		if (method == null) {
+			return;
+		}
+
+		Type returnType = method.getGenericReturnType();
+		registerClassId(returnType);
+
+		Type[] genericParameterTypes = method.getGenericParameterTypes();
+		for (int i = 0; i < genericParameterTypes.length; i++) {
+			registerClassId(genericParameterTypes[i]);
+		}
+	}
+
+	private void registerClassId(Type type) {
+		if (type == null) {
+			return;
+		}
+
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			Type rawType = parameterizedType.getRawType();
+			registerClassId(rawType);
+
+			Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+			for (int i = 0; i < actualTypeArguments.length; i++) {
+				registerClassId(actualTypeArguments[i]);
+			}
+		} else if (type instanceof Class) {
+			Class<?> clazz = (Class<?>) type;
+
+			if (clazz.isInterface()) {
+				return;
+			}
+
+			if (clazz.isPrimitive()) {
+				return;
+			}
+
+			if (clazz.isArray()) {
+				return;
+			}
+
+			if (clazz.isEnum()) {
+				return;
+			}
+
+			if (clazz.isAnnotation()) {
+				return;
+			}
+
+			if (clazz.isAnonymousClass()) {
+				return;
+			}
+
+			if (clazz.equals(CompletableFuture.class)) {
+				return;
+			}
+
+			String className = clazz.getName();
+
+			if (className.startsWith("java.lang.")) {
+				return;
+			}
+
+			if (classIdMap.containsKey(className)) {
+				return;
+			}
+
+			int classId = classIdMap//
+					.computeIfAbsent(className, key -> classIdGenerator.getAndIncrement());
+
+			logger.info("register Serializer.classId " + className + ":" + classId);
+
+			Method[] childMethods = getChildMethods(clazz);
+			for (int i = 0; i < childMethods.length; i++) {
+				registerClassId(childMethods[i]);
+			}
+		}
+	}
+
+	private Method[] getChildMethods(Class<?> clazz) {
+		BeanInfo info;
+		try {
+			info = Introspector.getBeanInfo(clazz);
+		} catch (Throwable t) {
+			return new Method[0];
+		}
+
+		PropertyDescriptor[] descriptors = info.getPropertyDescriptors();
+		if (descriptors.length == 0) {
+			return new Method[0];
+		}
+
+		Method[] childMethods = new Method[descriptors.length << 1];
+
+		for (int i = 0; i < descriptors.length; i++) {
+			PropertyDescriptor descriptor = descriptors[i];
+			childMethods[i] = descriptor.getReadMethod();
+			childMethods[i << 1] = descriptor.getWriteMethod();
+		}
+
+		return childMethods;
+	}
+
+	public static void main(String[] args) throws Exception {
+
 	}
 
 }

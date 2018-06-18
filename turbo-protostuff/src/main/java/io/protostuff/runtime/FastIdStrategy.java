@@ -11,13 +11,11 @@ import static io.protostuff.runtime.RuntimeFieldFactory.ID_SHORT;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.protostuff.ByteBufOutput;
 import io.protostuff.CollectionSchema;
 import io.protostuff.Input;
 import io.protostuff.MapSchema;
@@ -26,6 +24,8 @@ import io.protostuff.Output;
 import io.protostuff.Pipe;
 import io.protostuff.ProtostuffException;
 import io.protostuff.Schema;
+import rpc.turbo.util.FastMap;
+import rpc.turbo.util.concurrent.ConcurrentIntToObjectArrayMap;
 
 /**
  * The FQCN(fully qualified class name) will serve as the id (string). Does not
@@ -33,36 +33,27 @@ import io.protostuff.Schema;
  * serialized representation may be not very efficient.<br>
  * <br>
  * 
- * TODO: 使用 int 作为 id；server 端扫描注册，建立链接时获取 id 列表。
- * 
  * @author Leo Romanoff
  * @author David Yu
+ * @author Hank
  */
 public final class FastIdStrategy extends IdStrategy {
 
-	public static void main(String[] args) throws Exception {
-		CompletableFuture<String> future = new CompletableFuture<>();
-		System.out.println(future.getClass().getGenericSuperclass());
+	final Object pojoIDMapLock = new Object();
+	volatile FastMap<String, Integer> nameToPojoIDMap = new FastMap<>();
+	final ConcurrentIntToObjectArrayMap<String> pojoIDToNameMap = new ConcurrentIntToObjectArrayMap<>();
+	final ConcurrentIntToObjectArrayMap<HasSchema<?>> fastPojoMapping = new ConcurrentIntToObjectArrayMap<>();
+	final ConcurrentHashMap<String, HasSchema<?>> pojoMapping = new ConcurrentHashMap<>();
 
-		ParameterizedType genericReturnType = (ParameterizedType) FastIdStrategy.class.getMethod("test")
-				.getGenericReturnType();
+	final ConcurrentHashMap<String, EnumIO<?>> enumMapping = new ConcurrentHashMap<>();
 
-		System.out.println(genericReturnType.getActualTypeArguments()[0]);
-	}
+	final ConcurrentHashMap<String, CollectionSchema.MessageFactory> collectionMapping = new ConcurrentHashMap<>();
 
-	public CompletableFuture<String> test() {
-		return CompletableFuture.completedFuture("");
-	}
+	final ConcurrentHashMap<String, MapSchema.MessageFactory> mapMapping = new ConcurrentHashMap<>();
 
-	final ConcurrentHashMap<String, HasSchema<?>> pojoMapping = new ConcurrentHashMap<String, HasSchema<?>>();
-
-	final ConcurrentHashMap<String, EnumIO<?>> enumMapping = new ConcurrentHashMap<String, EnumIO<?>>();
-
-	final ConcurrentHashMap<String, CollectionSchema.MessageFactory> collectionMapping = new ConcurrentHashMap<String, CollectionSchema.MessageFactory>();
-
-	final ConcurrentHashMap<String, MapSchema.MessageFactory> mapMapping = new ConcurrentHashMap<String, MapSchema.MessageFactory>();
-
-	final ConcurrentHashMap<String, HasDelegate<?>> delegateMapping = new ConcurrentHashMap<String, HasDelegate<?>>();
+	final Object delegateMappingLock = new Object();
+	volatile FastMap<String, HasDelegate<?>> delegateMapping = new FastMap<>();
+	final ConcurrentIntToObjectArrayMap<HasDelegate<?>> fastDelegateMapping = new ConcurrentIntToObjectArrayMap<>();
 
 	public FastIdStrategy() {
 		super(DEFAULT_FLAGS, null, 0);
@@ -101,6 +92,27 @@ public final class FastIdStrategy extends IdStrategy {
 		return last == null || (last instanceof LazyRegister);
 	}
 
+	public void registerPojoID(Map<String, Integer> pojoIDMap) {
+		if (pojoIDMap == null || pojoIDMap.size() == 0) {
+			return;
+		}
+
+		synchronized (pojoIDMapLock) {
+			FastMap<String, Integer> tmp = new FastMap<>(this.nameToPojoIDMap);
+
+			tmp.ensureCapacity(pojoIDMap.size());
+			for (Map.Entry<String, Integer> kv : pojoIDMap.entrySet()) {
+				tmp.put(kv.getKey(), kv.getValue());
+			}
+
+			this.nameToPojoIDMap = tmp;
+
+			for (Map.Entry<String, Integer> kv : pojoIDMap.entrySet()) {
+				pojoIDToNameMap.put(kv.getValue(), kv.getKey());
+			}
+		}
+	}
+
 	/**
 	 * Registers an enum. Returns true if registration is successful.
 	 */
@@ -112,7 +124,22 @@ public final class FastIdStrategy extends IdStrategy {
 	 * Registers a delegate. Returns true if registration is successful.
 	 */
 	public <T> boolean registerDelegate(Delegate<T> delegate) {
-		return null == delegateMapping.putIfAbsent(delegate.typeClass().getName(), new HasDelegate<T>(delegate, this));
+		String key = delegate.typeClass().getName();
+		HasDelegate<T> hasDelegate = new HasDelegate<>(delegate, this);
+
+		if (!delegateMapping.containsKey(key)) {
+			synchronized (delegateMappingLock) {
+				if (delegateMapping.containsKey(key)) {
+					return false;
+				}
+
+				FastMap<String, HasDelegate<?>> tmp = new FastMap<>(delegateMapping);
+				tmp.put(key, hasDelegate);
+				return true;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -271,6 +298,7 @@ public final class FastIdStrategy extends IdStrategy {
 
 	@Override
 	protected void writeCollectionIdTo(Output output, int fieldNumber, Class<?> clazz) throws IOException {
+		@SuppressWarnings("unlikely-arg-type")
 		final CollectionSchema.MessageFactory factory = collectionMapping.get(clazz);
 		if (factory == null && clazz.getName().startsWith("java.util")) {
 			// jdk collection
@@ -307,6 +335,7 @@ public final class FastIdStrategy extends IdStrategy {
 
 	@Override
 	protected void writeMapIdTo(Output output, int fieldNumber, Class<?> clazz) throws IOException {
+		@SuppressWarnings("unlikely-arg-type")
 		final MapSchema.MessageFactory factory = mapMapping.get(clazz);
 		if (factory == null && clazz.getName().startsWith("java.util")) {
 			// jdk map
@@ -360,11 +389,22 @@ public final class FastIdStrategy extends IdStrategy {
 	@SuppressWarnings("unchecked")
 	protected <T> HasDelegate<T> tryWriteDelegateIdTo(Output output, int fieldNumber, Class<T> clazz)
 			throws IOException {
-		final HasDelegate<T> hd = (HasDelegate<T>) delegateMapping.get(clazz.getName());
-		if (hd == null)
-			return null;
+		final String className = clazz.getName();
 
-		output.writeString(fieldNumber, clazz.getName(), false);
+		final HasDelegate<T> hd = (HasDelegate<T>) delegateMapping.get(className);
+
+		if (hd == null) {
+			return null;
+		}
+
+		final Integer pojoID = nameToPojoIDMap.get(className);
+		if (pojoID != null) {
+			output.writeBool(fieldNumber, true, false);
+			((ByteBufOutput) output).writeRawInt32(pojoID);
+		} else {
+			output.writeBool(fieldNumber, false, false);
+			((ByteBufOutput) output).writeRawString(className);
+		}
 
 		return hd;
 	}
@@ -372,72 +412,240 @@ public final class FastIdStrategy extends IdStrategy {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected <T> HasDelegate<T> transferDelegateId(Input input, Output output, int fieldNumber) throws IOException {
-		final String className = input.readString();
+		boolean fastMod = input.readBool();
 
-		final HasDelegate<T> hd = (HasDelegate<T>) delegateMapping.get(className);
-		if (hd == null)
-			throw new UnknownTypeException("delegate: " + className + " (Outdated registry)");
+		if (fastMod) {
+			int id = input.readInt32();
+			HasDelegate<T> hd = (HasDelegate<T>) fastDelegateMapping.get(id);
 
-		output.writeString(fieldNumber, className, false);
+			if (hd == null) {
+				hd = (HasDelegate<T>) fastDelegateMapping.getOrUpdate(id, () -> {
+					String className = pojoIDToNameMap.get(id);
 
-		return hd;
+					if (className == null) {
+						throw new UnknownTypeException("delegateID: " + id + " (Outdated registry)");
+					}
+
+					HasDelegate<T> tmp = (HasDelegate<T>) delegateMapping.get(className);
+
+					if (tmp == null) {
+						throw new UnknownTypeException("delegate: " + className + " (Outdated registry)");
+					}
+
+					return tmp;
+				});
+			}
+
+			output.writeBool(fieldNumber, true, false);
+			((ByteBufOutput) output).writeRawInt32(id);
+
+			return hd;
+		} else {
+			final String className = input.readString();
+
+			final HasDelegate<T> hd = (HasDelegate<T>) delegateMapping.get(className);
+
+			if (hd == null) {
+				throw new UnknownTypeException("delegate: " + className + " (Outdated registry)");
+			}
+
+			output.writeBool(fieldNumber, false, false);
+			((ByteBufOutput) output).writeRawString(className);
+
+			return hd;
+		}
+
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected <T> HasDelegate<T> resolveDelegateFrom(Input input) throws IOException {
-		final String className = input.readString();
+		boolean fastMod = input.readBool();
 
-		final HasDelegate<T> hd = (HasDelegate<T>) delegateMapping.get(className);
-		if (hd == null)
-			throw new UnknownTypeException("delegate: " + className + " (Outdated registry)");
+		if (fastMod) {
+			int id = input.readInt32();
+			HasDelegate<T> hd = (HasDelegate<T>) fastDelegateMapping.get(id);
 
-		return hd;
+			if (hd == null) {
+				hd = (HasDelegate<T>) fastDelegateMapping.getOrUpdate(id, () -> {
+					String className = pojoIDToNameMap.get(id);
+
+					if (className == null) {
+						throw new UnknownTypeException("delegateID: " + id + " (Outdated registry)");
+					}
+
+					HasDelegate<T> tmp = (HasDelegate<T>) delegateMapping.get(className);
+
+					if (tmp == null) {
+						throw new UnknownTypeException("delegate: " + className + " (Outdated registry)");
+					}
+
+					return tmp;
+				});
+			}
+
+			return hd;
+		} else {
+			final String className = input.readString();
+
+			final HasDelegate<T> hd = (HasDelegate<T>) delegateMapping.get(className);
+
+			if (hd == null) {
+				throw new UnknownTypeException("delegate: " + className + " (Outdated registry)");
+			}
+
+			return hd;
+		}
+
 	}
 
 	@Override
 	protected <T> HasSchema<T> tryWritePojoIdTo(Output output, int fieldNumber, Class<T> clazz, boolean registered)
 			throws IOException {
 		HasSchema<T> hs = getSchemaWrapper(clazz, false);
+
 		if (hs == null || (registered && hs instanceof Lazy<?>))
 			return null;
 
-		output.writeString(fieldNumber, clazz.getName(), false);
+		final String className = clazz.getName();
+		final Integer pojoID = nameToPojoIDMap.get(className);
+
+		if (pojoID != null) {
+			output.writeBool(fieldNumber, true, false);
+			((ByteBufOutput) output).writeRawInt32(pojoID);
+		} else {
+			output.writeBool(fieldNumber, false, false);
+			((ByteBufOutput) output).writeRawString(className);
+		}
 
 		return hs;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected <T> HasSchema<T> writePojoIdTo(Output output, int fieldNumber, Class<T> clazz) throws IOException {
-		output.writeString(fieldNumber, clazz.getName(), false);
+		final String className = clazz.getName();
+		final Integer pojoID = nameToPojoIDMap.get(className);
 
-		// it is important to return the schema initialized (if it hasn't been).
-		return getSchemaWrapper(clazz, true);
-	}
+		if (pojoID != null) {
+			output.writeBool(fieldNumber, true, false);
+			((ByteBufOutput) output).writeRawInt32(pojoID);
 
-	@Override
-	protected <T> HasSchema<T> transferPojoId(Input input, Output output, int fieldNumber) throws IOException {
-		final String className = input.readString();
+			// it is important to return the schema initialized (if it hasn't been).
+			HasSchema<T> hs = (HasSchema<T>) fastPojoMapping.get(pojoID);
 
-		final HasSchema<T> wrapper = getSchemaWrapper(className, 0 != (AUTO_LOAD_POLYMORPHIC_CLASSES & flags));
-		if (wrapper == null) {
-			throw new ProtostuffException("polymorphic pojo not registered: " + className);
+			if (hs != null) {
+				return hs;
+			}
+
+			return (HasSchema<T>) fastPojoMapping.getOrUpdate(pojoID, () -> getSchemaWrapper(clazz, true));
+
+		} else {
+			output.writeBool(fieldNumber, false, false);
+			((ByteBufOutput) output).writeRawString(className);
+
+			// it is important to return the schema initialized (if it hasn't been).
+			HasSchema<T> hs = (HasSchema<T>) pojoMapping.get(className);
+
+			if (hs != null) {
+				return hs;
+			}
+
+			return getSchemaWrapper(clazz, true);
 		}
 
-		output.writeString(fieldNumber, className, false);
-
-		return wrapper;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	protected <T> HasSchema<T> transferPojoId(Input input, Output output, int fieldNumber) throws IOException {
+
+		boolean fastMod = input.readBool();
+
+		if (fastMod) {
+			int id = input.readInt32();
+
+			HasSchema<T> wrapper = (HasSchema<T>) fastPojoMapping.get(id);
+
+			if (wrapper == null) {
+				wrapper = (HasSchema<T>) fastPojoMapping.getOrUpdate(id, () -> {
+					String className = pojoIDToNameMap.get(id);
+
+					if (className == null) {
+						throw new UnknownTypeException("polymorphic pojoID not registered: " + id);
+					}
+
+					HasSchema<T> tmp = getSchemaWrapper(className, 0 != (AUTO_LOAD_POLYMORPHIC_CLASSES & flags));
+
+					if (tmp == null) {
+						throw new UnknownTypeException("polymorphic pojo not registered: " + className);
+					}
+
+					return tmp;
+				});
+			}
+
+			output.writeBool(fieldNumber, true, false);
+			((ByteBufOutput) output).writeRawInt32(id);
+
+		} else {
+			final String className = input.readString();
+
+			final HasSchema<T> wrapper = getSchemaWrapper(className, 0 != (AUTO_LOAD_POLYMORPHIC_CLASSES & flags));
+			if (wrapper == null) {
+				throw new ProtostuffException("polymorphic pojo not registered: " + className);
+			}
+
+			output.writeBool(fieldNumber, false, false);
+			((ByteBufOutput) output).writeRawString(className);
+
+			return wrapper;
+		}
+
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	protected <T> HasSchema<T> resolvePojoFrom(Input input, int fieldNumber) throws IOException {
-		final String className = input.readString();
 
-		final HasSchema<T> wrapper = getSchemaWrapper(className, 0 != (AUTO_LOAD_POLYMORPHIC_CLASSES & flags));
-		if (wrapper == null)
-			throw new ProtostuffException("polymorphic pojo not registered: " + className);
+		boolean fastMod = input.readBool();
 
-		return wrapper;
+		if (fastMod) {
+			int id = input.readInt32();
+
+			HasSchema<T> wrapper = (HasSchema<T>) fastPojoMapping.get(id);
+
+			if (wrapper == null) {
+				wrapper = (HasSchema<T>) fastPojoMapping.getOrUpdate(id, () -> {
+					String className = pojoIDToNameMap.get(id);
+
+					if (className == null) {
+						throw new UnknownTypeException("polymorphic pojoID not registered: " + id);
+					}
+
+					HasSchema<T> tmp = getSchemaWrapper(className, 0 != (AUTO_LOAD_POLYMORPHIC_CLASSES & flags));
+
+					if (tmp == null) {
+						throw new UnknownTypeException("polymorphic pojo not registered: " + className);
+					}
+
+					return tmp;
+				});
+			}
+
+			return wrapper;
+		} else {
+			final String className = input.readString();
+
+			final HasSchema<T> wrapper = getSchemaWrapper(className, 0 != (AUTO_LOAD_POLYMORPHIC_CLASSES & flags));
+
+			if (wrapper == null) {
+				throw new ProtostuffException("polymorphic pojo not registered: " + className);
+			}
+
+			return wrapper;
+		}
 	}
 
 	@Override

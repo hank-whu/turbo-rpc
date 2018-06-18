@@ -3,6 +3,7 @@ package rpc.turbo.transport.client;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -30,6 +31,7 @@ import rpc.turbo.protocol.ResponseStatus;
 import rpc.turbo.recycle.RecycleUtils;
 import rpc.turbo.remote.RemoteException;
 import rpc.turbo.serialization.Serializer;
+import rpc.turbo.serialization.SerializerFactory;
 import rpc.turbo.transport.client.future.RequestWithFuture;
 import rpc.turbo.util.SystemClock;
 import rpc.turbo.util.concurrent.AtomicMuiltInteger;
@@ -49,6 +51,7 @@ final class ConnectorContext implements Weightable, Closeable {
 	private final AtomicMuiltInteger errorCounter;
 	private final int globalTimeout;
 	private final CopyOnWriteArrayList<RpcClientFilter> filters;
+	private final Serializer serializer;
 
 	private final Method heartbeatMethod;
 	private final String heartbeatServiceMethodName;
@@ -58,10 +61,11 @@ final class ConnectorContext implements Weightable, Closeable {
 	private volatile int weight;
 	private volatile boolean isClosed = false;
 
-	ConnectorContext(EventLoopGroup eventLoopGroup, AppConfig appConfig, Serializer serializer,
-			CopyOnWriteArrayList<RpcClientFilter> filters, HostPort serverAddress) {
+	ConnectorContext(EventLoopGroup eventLoopGroup, AppConfig appConfig, CopyOnWriteArrayList<RpcClientFilter> filters,
+			HostPort serverAddress) {
 		this.appConfig = appConfig;
 		this.connectCount = appConfig.getConnectPerServer();
+		this.serializer = SerializerFactory.createSerializer(appConfig.getSerializer());
 
 		this.connector = new NettyClientConnector(//
 				eventLoopGroup, //
@@ -98,6 +102,31 @@ final class ConnectorContext implements Weightable, Closeable {
 		}
 
 		return serviceMethodNameToServiceIdMap.containsKey(serviceMethodName);
+	}
+
+	void initSerializer() throws Exception {
+		if (!serializer.isSupportedClassId()) {
+			return;
+		}
+
+		int serviceId = TurboConnectService.SERVICE_CLASS_ID_REGISTER;
+		long timeout = TurboService.DEFAULT_TIME_OUT;
+
+		CompletableFuture<Map<String, Integer>> future = execute(serviceId, timeout);
+		Map<String, Integer> classIds = future.get();
+
+		Map<Class<?>, Integer> classIdMap = new HashMap<>();
+		classIds.forEach((className, id) -> {
+			try {
+				classIdMap.put(Class.forName(className), id);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		serializer.setClassIds(classIdMap);
+
+		logger.info(serverAddress + " register Serializer.classIds: " + classIdMap);
 	}
 
 	boolean heartbeat() {

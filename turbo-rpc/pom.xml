@@ -3,14 +3,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-rpc</artifactId>
-	<version>0.0.6</version>
+	<version>${version.turbo}</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-rpc</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-rpc</url>
 	<description>turbo rpc</description>
+
+	<parent>
+		<groupId>com.turbo-rpc</groupId>
+		<artifactId>turbo-all</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<licenses>
 		<license>
@@ -35,20 +41,6 @@
 	</developers>
 
 
-	<properties>
-		<maven.compiler.source>1.9</maven.compiler.source>
-		<maven.compiler.target>1.9</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.turbo>0.0.6</version.turbo>
-		<version.netty>4.1.24.Final</version.netty>
-		<version.jackson>2.9.5</version.jackson>
-		<version.kryo>4.0.2</version.kryo>
-		<version.protostuff>1.6.0</version.protostuff>
-		<version.javassist>3.22.0-GA</version.javassist>
-		<version.guava>25.0-jre</version.guava>
-		<version.typesafe-config>1.3.3</version.typesafe-config>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.turbo-rpc</groupId>
@@ -56,75 +48,54 @@
 			<version>${version.turbo}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.turbo-rpc</groupId>
+			<artifactId>turbo-utils</artifactId>
+			<version>${version.turbo}</version>
+		</dependency>
+		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-codec</artifactId>
-			<version>${version.netty}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-codec-http</artifactId>
-			<version>${version.netty}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
-			<version>${version.netty}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-transport-native-epoll</artifactId>
-			<version>${version.netty}</version>
 			<classifier>linux-x86_64</classifier>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${version.jackson}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jdk8</artifactId>
-			<version>${version.jackson}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${version.jackson}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-afterburner</artifactId>
-			<version>${version.jackson}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>kryo</artifactId>
-			<version>${version.kryo}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.protostuff</groupId>
-			<artifactId>protostuff-core</artifactId>
-			<version>${version.protostuff}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.protostuff</groupId>
-			<artifactId>protostuff-runtime</artifactId>
-			<version>${version.protostuff}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>${version.javassist}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>${version.guava}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe</groupId>
 			<artifactId>config</artifactId>
-			<version>${version.typesafe-config}</version>
 		</dependency>
 
 	</dependencies>

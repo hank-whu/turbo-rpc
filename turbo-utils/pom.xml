@@ -3,14 +3,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-utils</artifactId>
-	<version>0.0.6</version>
+	<version>${version.turbo}</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-utils</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-utils</url>
 	<description>utils</description>
+
+	<parent>
+		<groupId>com.turbo-rpc</groupId>
+		<artifactId>turbo-all</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<licenses>
 		<license>
@@ -34,28 +40,17 @@
 		</developer>
 	</developers>
 
-	<properties>
-		<maven.compiler.source>1.9</maven.compiler.source>
-		<maven.compiler.target>1.9</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<version.netty>4.1.24.Final</version.netty>
-		<version.guava>25.0-jre</version.guava>
-	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-buffer</artifactId>
-			<version>${version.netty}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>${version.guava}</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>

@@ -252,8 +252,7 @@ public class App implements Closeable {
 			return;
 		}
 
-		ConnectorContext context = new ConnectorContext(eventLoopGroup, appConfig, appConfig.getSerializer(), filters,
-				serverAddress);
+		ConnectorContext context = new ConnectorContext(eventLoopGroup, appConfig, filters, serverAddress);
 
 		try {
 			context.connect();
@@ -270,6 +269,8 @@ public class App implements Closeable {
 
 			Map<String, Integer> methodStringToServiceIdMap = loadServiceId(context);
 			context.setServiceMethodNameToServiceIdMap(methodStringToServiceIdMap);
+
+			context.initSerializer();
 
 			addConnect(context);
 		} catch (Exception e) {
@@ -311,7 +312,8 @@ public class App implements Closeable {
 		Thread _rescueAndHeartbeatJobThread = new Thread(() -> {
 			while (!isCloseing) {
 
-				if (System.currentTimeMillis() - lastRescueTime > RESCUE_PERIOD) {
+				if (!isCloseing && !appForkJoinPool.isShutdown()
+						&& System.currentTimeMillis() - lastRescueTime > RESCUE_PERIOD) {
 					try {
 						appForkJoinPool.submit(() -> rescue()).get();
 						lastRescueTime = System.currentTimeMillis();
@@ -330,7 +332,8 @@ public class App implements Closeable {
 					break;
 				}
 
-				if (System.currentTimeMillis() - lastHeartbeatTime > HEARTBEAT_PERIOD) {
+				if (!isCloseing && !appForkJoinPool.isShutdown()
+						&& System.currentTimeMillis() - lastHeartbeatTime > HEARTBEAT_PERIOD) {
 					try {
 						appForkJoinPool.submit(() -> heartbeat()).get();
 						lastHeartbeatTime = System.currentTimeMillis();
@@ -619,6 +622,8 @@ public class App implements Closeable {
 						context.clear();
 						context.setServiceMethodNameToServiceIdMap(methodStringToServiceIdMap);
 
+						context.initSerializer();
+
 						zombieMap.remove(serverAddress);
 						activeMap.put(serverAddress, context);
 
@@ -708,6 +713,7 @@ public class App implements Closeable {
 		}
 
 		isCloseing = true;
+		rescueAndHeartbeatJobThread.interrupt();
 
 		activeMap.forEach((key, connectorContext) -> {
 			try {
@@ -718,8 +724,6 @@ public class App implements Closeable {
 				}
 			}
 		});
-
-		rescueAndHeartbeatJobThread.interrupt();
 
 		activeMap.clear();
 		zombieMap.clear();
