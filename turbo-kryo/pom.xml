@@ -3,14 +3,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-kryo</artifactId>
-	<version>0.0.7</version>
+	<version>${version.turbo}</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-kryo</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-kryo</url>
 	<description>kryo</description>
+
+	<parent>
+		<groupId>com.turbo-rpc</groupId>
+		<artifactId>turbo-all</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<licenses>
 		<license>
@@ -34,15 +40,6 @@
 		</developer>
 	</developers>
 
-	<properties>
-		<maven.compiler.source>1.9</maven.compiler.source>
-		<maven.compiler.target>1.9</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<version.turbo>0.0.7</version.turbo>
-		<version.kryo>4.0.2</version.kryo>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.turbo-rpc</groupId>
@@ -52,9 +49,8 @@
 		<dependency>
 			<groupId>com.esotericsoftware</groupId>
 			<artifactId>kryo</artifactId>
-			<version>${version.kryo}</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<distributionManagement>

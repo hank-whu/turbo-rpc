@@ -3,19 +3,25 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-jmh</artifactId>
-	<version>0.0.7</version>
+	<version>${version.turbo}</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-jmh</name>
 	<url>http://maven.apache.org</url>
 
+	<parent>
+		<groupId>com.turbo-rpc</groupId>
+		<artifactId>turbo-all</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
 	<properties>
 		<maven.compiler.source>1.9</maven.compiler.source>
 		<maven.compiler.target>1.9</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.turbo>0.0.7</version.turbo>
+
 		<version.agrona>0.9.12</version.agrona>
 		<version.jctools>2.1.1</version.jctools>
 		<version.logback>1.2.3</version.logback>
@@ -117,7 +123,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
-			<version>${version.spring-boot}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.vibur</groupId>

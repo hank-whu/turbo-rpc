@@ -3,14 +3,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-protostuff</artifactId>
-	<version>0.0.7</version>
+	<version>${version.turbo}</version>
 	<packaging>jar</packaging>
 
 	<name>turbo-protostuff</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-protostuff</url>
 	<description>protostuff</description>
+
+	<parent>
+		<groupId>com.turbo-rpc</groupId>
+		<artifactId>turbo-all</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<licenses>
 		<license>
@@ -34,15 +40,6 @@
 		</developer>
 	</developers>
 
-	<properties>
-		<maven.compiler.source>1.9</maven.compiler.source>
-		<maven.compiler.target>1.9</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<version.turbo>0.0.7</version.turbo>
-		<version.protostuff>1.6.0</version.protostuff>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.turbo-rpc</groupId>
@@ -52,12 +49,10 @@
 		<dependency>
 			<groupId>io.protostuff</groupId>
 			<artifactId>protostuff-core</artifactId>
-			<version>${version.protostuff}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.protostuff</groupId>
 			<artifactId>protostuff-runtime</artifactId>
-			<version>${version.protostuff}</version>
 		</dependency>
 
 	</dependencies>
