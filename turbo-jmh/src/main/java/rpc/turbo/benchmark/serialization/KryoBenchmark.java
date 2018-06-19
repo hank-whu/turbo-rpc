@@ -114,16 +114,9 @@ public class KryoBenchmark {
 
 	public static void main(String[] args) throws Exception {
 
-		// CtClass.debugDump =
-		// "C:\\Users\\hank\\Documents\\javassist\\rpc\\turbo\\serialization\\kryo";
-		// KryoBenchmark benchmark = new KryoBenchmark();
-
-		// for (int i = 0; i < Long.MAX_VALUE; i++) {
-		// benchmark.serializeUserList();
-		// }
-
 		Options opt = new OptionsBuilder()//
 				.include(KryoBenchmark.class.getName())//
+				.include(ProtostuffBenchmark.class.getName())//
 				.warmupIterations(5)//
 				.measurementIterations(5)//
 				.threads(CONCURRENCY)//
