@@ -20,13 +20,28 @@
 package rpc.turbo.serialization.kryo;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.util.DefaultStreamFactory;
@@ -36,7 +51,7 @@ import io.netty.buffer.ByteBuf;
 
 public final class KryoContext {
 
-	private final static int REGISTRATION_ID_OFFSET = 20;
+	private final static int REGISTRATION_ID_OFFSET = 55;
 
 	private final Kryo kryo;
 	private final ByteBufInput input = new ByteBufInput(null);
@@ -49,16 +64,49 @@ public final class KryoContext {
 		kryo.setDefaultSerializer(FastSerializer.class);
 		kryo.setReferences(false);
 
-		kryo.register(int[].class);
-		kryo.register(long[].class);
-		kryo.register(Object[].class);
 		kryo.register(ArrayList.class);
 		kryo.register(LinkedList.class);
+		kryo.register(CopyOnWriteArrayList.class);
 		kryo.register(HashMap.class);
+		kryo.register(ConcurrentHashMap.class);
+		kryo.register(TreeMap.class);
+		kryo.register(TreeSet.class);
 		kryo.register(HashSet.class);
 		kryo.register(java.util.Date.class);
+		kryo.register(java.sql.Date.class);
 		kryo.register(LocalDate.class);
 		kryo.register(LocalDateTime.class);
+		kryo.register(byte[].class);
+		kryo.register(char[].class);
+		kryo.register(short[].class);
+		kryo.register(int[].class);
+		kryo.register(long[].class);
+		kryo.register(float[].class);
+		kryo.register(double[].class);
+		kryo.register(boolean[].class);
+		kryo.register(String[].class);
+		kryo.register(Object[].class);
+		kryo.register(BigInteger.class);
+		kryo.register(BigDecimal.class);
+		kryo.register(Class.class);
+		kryo.register(Enum.class);
+		kryo.register(EnumSet.class);
+		kryo.register(Currency.class);
+		kryo.register(StringBuffer.class);
+		kryo.register(StringBuilder.class);
+		kryo.register(Collections.EMPTY_LIST.getClass());
+		kryo.register(Collections.EMPTY_MAP.getClass());
+		kryo.register(Collections.EMPTY_SET.getClass());
+		kryo.register(Collections.singletonList(null).getClass());
+		kryo.register(Collections.singletonMap(null, null).getClass());
+		kryo.register(Collections.singleton(null).getClass());
+		kryo.register(Collection.class);
+		kryo.register(Map.class);
+		kryo.register(TimeZone.class);
+		kryo.register(Calendar.class);
+		kryo.register(Locale.class);
+		kryo.register(Charset.class);
+		kryo.register(URL.class);
 	}
 
 	public void registerClassIds(Map<Class<?>, Integer> classIds) {
