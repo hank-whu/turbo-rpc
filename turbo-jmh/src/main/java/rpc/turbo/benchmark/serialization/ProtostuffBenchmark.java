@@ -52,7 +52,7 @@ public class ProtostuffBenchmark {
 
 	public ProtostuffBenchmark() {
 
-		fastIdStrategy.registerPojoID(Map.of(User.class.getName(), 1));
+		fastIdStrategy.registerPojoID(Map.of(User.class.getName(), 0, Page.class.getName(), 1));
 
 		userPageSchema = RuntimeSchema.getSchema(Page.class, fastIdStrategy);
 		wrapUserSchema = RuntimeSchema.getSchema(WrapUser.class, fastIdStrategy);

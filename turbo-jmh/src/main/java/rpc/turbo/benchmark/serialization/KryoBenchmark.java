@@ -1,5 +1,6 @@
 package rpc.turbo.benchmark.serialization;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -18,6 +19,7 @@ import com.esotericsoftware.kryo.util.MapReferenceResolver;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import rpc.turbo.benchmark.bean.Page;
 import rpc.turbo.benchmark.bean.User;
@@ -50,13 +52,18 @@ public class KryoBenchmark {
 		kryo.setDefaultSerializer(FastSerializer.class);
 		kryo.setReferences(false);
 
+		kryo.register(User.class);
+		kryo.register(Page.class);
+		kryo.register(ArrayList.class);
+
 		try {
 			userBuffer.clear();
 			output.setBuffer(userBuffer);
 			kryo.writeClassAndObject(output, user);
 
-			System.out.println("userBytes.length：" + userBuffer.writerIndex());
+			System.out.println(new String(ByteBufUtil.getBytes(userBuffer.duplicate())));
 			System.out.println(deserializeUser());
+			System.out.println("userBytes.length：" + userBuffer.writerIndex());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -66,8 +73,9 @@ public class KryoBenchmark {
 			output.setBuffer(listBuffer);
 			kryo.writeClassAndObject(output, userPage);
 
-			System.out.println("userPageBytes.length：" + listBuffer.writerIndex());
+			System.out.println(new String(ByteBufUtil.getBytes(listBuffer.duplicate())));
 			System.out.println(deserializeUserPage());
+			System.out.println("userPageBytes.length：" + listBuffer.writerIndex());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -33,6 +33,12 @@ public class TruboClientBootTest {
 		System.out.println("userService: " + userService.getClass().getName());
 		System.out.println("userService2: " + userService2.getClass().getName());
 
+		System.out.println("existUser:");
+		boolean existUser = userService.existUser("hank.whu@gmail.com").join();
+		System.out.println(existUser);
+		System.out.println("=====================");
+		System.out.println();
+
 		System.out.println("getUser:");
 		User user = userService.getUser(1).join();
 		System.out.println(user);

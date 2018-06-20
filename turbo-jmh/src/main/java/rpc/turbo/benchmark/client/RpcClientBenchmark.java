@@ -18,6 +18,7 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
@@ -118,7 +119,7 @@ public class RpcClientBenchmark extends AbstractClient {
 		System.out.println(clientBenchmark.listUser());
 		System.out.println(clientBenchmark.createUser());
 
-		//System.exit(1);
+		// System.exit(1);
 
 		ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(32);
 		RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
@@ -157,8 +158,10 @@ public class RpcClientBenchmark extends AbstractClient {
 
 		Options opt = new OptionsBuilder()//
 				.include(RpcClientBenchmark.class.getSimpleName())//
-				.warmupIterations(5)//
-				.measurementIterations(5)//
+				.warmupIterations(3)//
+				.warmupTime(TimeValue.seconds(10))//
+				.measurementIterations(3)//
+				.measurementTime(TimeValue.seconds(10))//
 				.threads(CONCURRENCY)//
 				.forks(1)//
 				.build();
