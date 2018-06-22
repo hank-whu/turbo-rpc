@@ -37,6 +37,7 @@
 		<version.conversantmedia-disruptor>1.2.11</version.conversantmedia-disruptor>
 		<version.lite-pool>1.0.0-RC2</version.lite-pool>
 		<version.redisson>3.6.5</version.redisson>
+		<version.eclipse-collections>9.2.0</version.eclipse-collections>
 	</properties>
 
 	<dependencies>
@@ -143,6 +144,16 @@
 			<groupId>org.redisson</groupId>
 			<artifactId>redisson</artifactId>
 			<version>${version.redisson}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+			<version>${version.eclipse-collections}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections-forkjoin</artifactId>
+			<version>${version.eclipse-collections}</version>
 		</dependency>
 
 	</dependencies>

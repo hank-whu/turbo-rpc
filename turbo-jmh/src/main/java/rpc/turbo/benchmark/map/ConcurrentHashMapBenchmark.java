@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMapUnsafe;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -25,12 +26,17 @@ public class ConcurrentHashMapBenchmark {
 	private final ConcurrentIntToObjectArrayMap<Integer> intArrayMap = new ConcurrentIntToObjectArrayMap<>();
 	private final ConcurrentHashMap<Integer, Integer> concurrentMap = new ConcurrentHashMap<>();
 	private final NonBlockingHashMapLong<Integer> nonBlockingHashMapLong = new NonBlockingHashMapLong<>();
+	private final org.eclipse.collections.impl.map.mutable.ConcurrentHashMap<Integer, Integer> eclipseConcurrentHashMap//
+			= new org.eclipse.collections.impl.map.mutable.ConcurrentHashMap<>();
+	private final ConcurrentHashMapUnsafe<Integer, Integer> eclipseConcurrentHashMapUnsafe = new ConcurrentHashMapUnsafe<>();
 
 	public ConcurrentHashMapBenchmark() {
 		for (int i = 0; i < 1024 * 256; i++) {
 			intArrayMap.put(i, i);
 			concurrentMap.put(i, i);
 			nonBlockingHashMapLong.put(i, i);
+			eclipseConcurrentHashMap.put(i, i);
+			eclipseConcurrentHashMapUnsafe.put(i, i);
 		}
 	}
 
@@ -43,11 +49,18 @@ public class ConcurrentHashMapBenchmark {
 	@Benchmark
 	@BenchmarkMode({ Mode.Throughput })
 	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public void _randomKey() {
+		ThreadLocalRandom.current().nextInt(1024 * 256);
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
 	public Integer intArrayMap() {
 		int random = ThreadLocalRandom.current().nextInt(1024 * 256);
 		intArrayMap.put(random, null);
 		intArrayMap.put(random, random);
-		return intArrayMap.get(512);
+		return intArrayMap.get(random);
 	}
 
 	@Benchmark
@@ -67,7 +80,7 @@ public class ConcurrentHashMapBenchmark {
 		int random = ThreadLocalRandom.current().nextInt(1024 * 256);
 		concurrentMap.remove(random);
 		concurrentMap.put(random, random);
-		return concurrentMap.get(512);
+		return concurrentMap.get(random);
 	}
 
 	@Benchmark
@@ -77,7 +90,27 @@ public class ConcurrentHashMapBenchmark {
 		int random = ThreadLocalRandom.current().nextInt(1024 * 256);
 		nonBlockingHashMapLong.remove(random);
 		nonBlockingHashMapLong.put(random, random);
-		return nonBlockingHashMapLong.get(512);
+		return nonBlockingHashMapLong.get(random);
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public Integer eclipseConcurrentHashMap() {
+		int random = ThreadLocalRandom.current().nextInt(1024 * 256);
+		eclipseConcurrentHashMap.remove(random);
+		eclipseConcurrentHashMap.put(random, random);
+		return eclipseConcurrentHashMap.get(random);
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public Integer eclipseConcurrentHashMapUnsafe() {
+		int random = ThreadLocalRandom.current().nextInt(1024 * 256);
+		eclipseConcurrentHashMapUnsafe.remove(random);
+		eclipseConcurrentHashMapUnsafe.put(random, random);
+		return eclipseConcurrentHashMapUnsafe.get(random);
 	}
 
 	public static void main(String[] args) throws RunnerException {

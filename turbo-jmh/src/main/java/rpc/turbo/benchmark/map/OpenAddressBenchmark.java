@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.agrona.collections.Int2IntHashMap;
 import org.agrona.collections.Int2ObjectHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Mode;
@@ -31,6 +32,8 @@ public class OpenAddressBenchmark {
 	private final IntMap<Integer> kryoMap = new IntMap<>();
 	private final Int2IntHashMap agronaInt2IntMap = new Int2IntHashMap(-1);
 	private final Int2ObjectHashMap<Integer> agronaInt2ObjectMap = new Int2ObjectHashMap<>();
+	private final IntIntHashMap eclipseIntIntHashMap = new IntIntHashMap();
+	private final IntObjectHashMap<Integer> eclipseIntObjectHashMap = new IntObjectHashMap<>();
 
 	public OpenAddressBenchmark() {
 		for (int i = 0; i < 1024 * 64; i++) {
@@ -42,6 +45,8 @@ public class OpenAddressBenchmark {
 			kryoMap.put(i, obj);
 			agronaInt2IntMap.put(i, i);
 			agronaInt2ObjectMap.put(i, obj);
+			eclipseIntIntHashMap.put(i, obj);
+			eclipseIntObjectHashMap.put(i, obj);
 		}
 	}
 
@@ -135,6 +140,24 @@ public class OpenAddressBenchmark {
 	@Benchmark
 	@BenchmarkMode({ Mode.Throughput })
 	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	public void putEclipseIntIntHashMap() {
+		for (int i = 0; i < 1024 * 64; i++) {
+			eclipseIntIntHashMap.put(i, i);
+		}
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	public void putEclipseIntObjectHashMap() {
+		for (int i = 0; i < 1024 * 64; i++) {
+			eclipseIntObjectHashMap.put(i, Integer.valueOf(i));
+		}
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
 	public void getAgronaInt2IntMap() {
 		for (int i = 0; i < 1024 * 64; i++) {
 			agronaInt2IntMap.get(i);
@@ -157,6 +180,37 @@ public class OpenAddressBenchmark {
 		for (int i = 0; i < 1024 * 64; i++) {
 			agronaInt2ObjectMap.get(i);
 		}
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	public void getEclipseIntIntHashMap() {
+		for (int i = 0; i < 1024 * 64; i++) {
+			eclipseIntIntHashMap.get(i);
+		}
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	public void getEclipseIntObjectHashMap() {
+		for (int i = 0; i < 1024 * 64; i++) {
+			eclipseIntObjectHashMap.get(i);
+		}
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MILLISECONDS)
+	public void boxInt() {
+		Integer value = null;
+
+		for (int i = 0; i < 1024 * 64; i++) {
+			value = Integer.valueOf(i);
+		}
+
+		value.intValue();
 	}
 
 	public static void main(String[] args) throws RunnerException {
