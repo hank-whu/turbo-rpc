@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Registration;
@@ -38,10 +37,6 @@ import rpc.turbo.util.tuple.Tuple2;
  */
 public class FastSerializer<T> extends Serializer<T> {
 	private static final String CHILD_REGISTRATION_PREFIX = "childRegistration$";
-
-	// 防止重复创建
-	private static final ConcurrentHashMap<Class<?>, Serializer<?>> fastSerializerHolder//
-			= new ConcurrentHashMap<>();
 
 	private final Kryo kryo;
 	private final Class<T> type;
@@ -124,76 +119,61 @@ public class FastSerializer<T> extends Serializer<T> {
 	private Serializer<T> generateRealSerializer() throws Exception {
 		Objects.nonNull(type);
 
-		Serializer<T> serializer = (Serializer<T>) fastSerializerHolder.get(type);
-		if (serializer != null) {
-			return serializer;
+		final String serializerClassName = "rpc.turbo.serialization.kryo.FastSerializer_"//
+				+ UUID.randomUUID().toString().replace("-", "");
+
+		// 创建类
+		ClassPool pool = ClassPool.getDefault();
+		CtClass serializerCtClass = pool.makeClass(serializerClassName);
+		serializerCtClass.setSuperclass(pool.getCtClass(Serializer.class.getName()));
+
+		// 添加无参的构造函数
+		CtConstructor constructor0 = new CtConstructor(null, serializerCtClass);
+		constructor0.setModifiers(Modifier.PUBLIC);
+		constructor0.setBody("{}");
+		serializerCtClass.addConstructor(constructor0);
+
+		String writeMethodCode = generateWriteMethod();
+		String readMethodCode = generateReadMethod();
+
+		// 添加字段childRegistration$0
+		if (childRegistrationMap != null && childRegistrationMap.size() > 0) {
+			for (Tuple2<Registration, Integer> kv : childRegistrationMap.values()) {
+				String fieldName = CHILD_REGISTRATION_PREFIX + kv._2;
+
+				CtField ctField = new CtField(pool.get(Registration.class.getName()), fieldName, serializerCtClass);
+				ctField.setModifiers(Modifier.PRIVATE);
+				serializerCtClass.addField(ctField);
+			}
 		}
 
-		synchronized (type) {
-			serializer = (Serializer<T>) fastSerializerHolder.get(type);
-			if (serializer != null) {
-				return serializer;
+		// 添加write方法
+		CtMethod writeMethod = CtNewMethod.make(writeMethodCode, serializerCtClass);
+		serializerCtClass.addMethod(writeMethod);
+
+		// 添加read方法
+		CtMethod readMethod = CtNewMethod.make(readMethodCode, serializerCtClass);
+		serializerCtClass.addMethod(readMethod);
+
+		Class<?> serializerClass = serializerCtClass.toClass();
+
+		// 通过反射创建有参的实例
+		Serializer<T> serializer = (Serializer<T>) serializerClass.getConstructor().newInstance();
+
+		// 通过反射给字段赋值
+		if (childRegistrationMap != null && childRegistrationMap.size() > 0) {
+			for (Tuple2<Registration, Integer> kv : childRegistrationMap.values()) {
+				String fieldName = CHILD_REGISTRATION_PREFIX + kv._2;
+
+				Field field = serializerClass.getDeclaredField(fieldName);
+				field.setAccessible(true);
+				field.set(serializer, kv._1);
 			}
 
-			final String serializerClassName = "rpc.turbo.serialization.kryo.FastSerializer_"//
-					+ UUID.randomUUID().toString().replace("-", "");
-
-			// 创建类
-			ClassPool pool = ClassPool.getDefault();
-			CtClass serializerCtClass = pool.makeClass(serializerClassName);
-			serializerCtClass.setSuperclass(pool.getCtClass(Serializer.class.getName()));
-
-			// 添加无参的构造函数
-			CtConstructor constructor0 = new CtConstructor(null, serializerCtClass);
-			constructor0.setModifiers(Modifier.PUBLIC);
-			constructor0.setBody("{}");
-			serializerCtClass.addConstructor(constructor0);
-
-			String writeMethodCode = generateWriteMethod();
-			String readMethodCode = generateReadMethod();
-
-			// 添加字段childRegistration$0
-			if (childRegistrationMap != null && childRegistrationMap.size() > 0) {
-				for (Tuple2<Registration, Integer> kv : childRegistrationMap.values()) {
-					String fieldName = CHILD_REGISTRATION_PREFIX + kv._2;
-
-					CtField ctField = new CtField(pool.get(Registration.class.getName()), fieldName, serializerCtClass);
-					ctField.setModifiers(Modifier.PRIVATE);
-					serializerCtClass.addField(ctField);
-				}
-			}
-
-			// 添加write方法
-			CtMethod writeMethod = CtNewMethod.make(writeMethodCode, serializerCtClass);
-			serializerCtClass.addMethod(writeMethod);
-
-			// 添加read方法
-			CtMethod readMethod = CtNewMethod.make(readMethodCode, serializerCtClass);
-			serializerCtClass.addMethod(readMethod);
-
-			Class<?> serializerClass = serializerCtClass.toClass();
-
-			// 通过反射创建有参的实例
-			serializer = (Serializer<T>) serializerClass.getConstructor().newInstance();
-
-			// 通过反射给字段赋值
-			if (childRegistrationMap != null && childRegistrationMap.size() > 0) {
-				for (Tuple2<Registration, Integer> kv : childRegistrationMap.values()) {
-					String fieldName = CHILD_REGISTRATION_PREFIX + kv._2;
-
-					Field field = serializerClass.getDeclaredField(fieldName);
-					field.setAccessible(true);
-					field.set(serializer, kv._1);
-				}
-
-				childRegistrationMap = null;
-			}
-
-			fastSerializerHolder.put(type, serializer);
-
-			return serializer;
+			childRegistrationMap = null;
 		}
 
+		return serializer;
 	}
 
 	private Tuple2<Registration, Integer> getRegistration(Class<?> type) {
