@@ -110,7 +110,7 @@ public final class KryoContext {
 	}
 
 	public void registerClassIds(Map<Class<?>, Integer> classIds) {
-		if (classIds == null || classIds.size() == 0 || latestClassIds == classIds) {
+		if (latestClassIds == classIds || classIds == null || classIds.size() == 0) {
 			return;
 		}
 
