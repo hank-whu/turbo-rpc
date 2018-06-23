@@ -7,6 +7,7 @@ import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -94,43 +95,21 @@ public final class RandomId implements Serializable {
 		buffer.writeLong(random);
 	}
 
-	/*public String toHexStringOld() {
-		// java8 下更高效
-		byte[] bytes = ThreadLocalBytes.current();
-
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0, byteToHexLE(timestamp >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, byteToHexLE(timestamp >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, byteToHexLE(timestamp >> 8));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, byteToHexLE(timestamp));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, byteToHexLE(random >> 52));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10, byteToHexLE(random >> 48));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12, byteToHexLE(random >> 40));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14, byteToHexLE(random >> 32));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16, byteToHexLE(random >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18, byteToHexLE(random >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20, byteToHexLE(random >> 8));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 22, byteToHexLE(random));
-
-		String hex = new String(bytes, 0, 24, StandardCharsets.ISO_8859_1);
-
-		return hex;
-	}*/
-
 	public String toHexString() {
 		// java9 下更高效
 		byte[] bytes = new byte[24];
 
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0, byteToHexLE(timestamp >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, byteToHexLE(timestamp >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, byteToHexLE(timestamp >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0, byteToHexLE(timestamp >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, byteToHexLE(timestamp >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, byteToHexLE(timestamp >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, byteToHexLE(timestamp));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, byteToHexLE(random >> 52));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10, byteToHexLE(random >> 48));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12, byteToHexLE(random >> 40));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14, byteToHexLE(random >> 32));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16, byteToHexLE(random >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18, byteToHexLE(random >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20, byteToHexLE(random >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, byteToHexLE(random >>> 56));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10, byteToHexLE(random >>> 48));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12, byteToHexLE(random >>> 40));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14, byteToHexLE(random >>> 32));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16, byteToHexLE(random >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18, byteToHexLE(random >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20, byteToHexLE(random >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 22, byteToHexLE(random));
 
 		String hex = UnsafeStringUtils.toLatin1String(bytes);
@@ -147,17 +126,17 @@ public final class RandomId implements Serializable {
 		byte[] bytes = new byte[32];
 
 		unsafe().putLong(bytes, ARRAY_BYTE_BASE_OFFSET, HEX32_PADDING);
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0 + 8, byteToHexLE(timestamp >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2 + 8, byteToHexLE(timestamp >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4 + 8, byteToHexLE(timestamp >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0 + 8, byteToHexLE(timestamp >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2 + 8, byteToHexLE(timestamp >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4 + 8, byteToHexLE(timestamp >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6 + 8, byteToHexLE(timestamp));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8 + 8, byteToHexLE(random >> 52));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10 + 8, byteToHexLE(random >> 48));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12 + 8, byteToHexLE(random >> 40));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14 + 8, byteToHexLE(random >> 32));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16 + 8, byteToHexLE(random >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18 + 8, byteToHexLE(random >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20 + 8, byteToHexLE(random >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8 + 8, byteToHexLE(random >>> 56));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10 + 8, byteToHexLE(random >>> 48));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12 + 8, byteToHexLE(random >>> 40));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14 + 8, byteToHexLE(random >>> 32));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16 + 8, byteToHexLE(random >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18 + 8, byteToHexLE(random >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20 + 8, byteToHexLE(random >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 22 + 8, byteToHexLE(random));
 
 		String hex = UnsafeStringUtils.toLatin1String(bytes);
@@ -202,6 +181,12 @@ public final class RandomId implements Serializable {
 
 	private static int currentSeconds() {
 		return (int) (SystemClock.fast().seconds() - OFFSET_SECONDS);
+	}
+
+	static {
+		if (ByteOrder.nativeOrder() != ByteOrder.LITTLE_ENDIAN) {
+			throw new Error("only support little-endian!");
+		}
 	}
 
 	public static void main(String[] args) {

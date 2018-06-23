@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.net.NetworkInterface;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -147,17 +148,17 @@ public final class ObjectId implements Serializable {
 	public String toHexString() {
 		byte[] bytes = new byte[24];
 
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0, byteToHexLE(timestamp >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, byteToHexLE(timestamp >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, byteToHexLE(timestamp >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0, byteToHexLE(timestamp >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2, byteToHexLE(timestamp >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4, byteToHexLE(timestamp >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6, byteToHexLE(timestamp));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, byteToHexLE(union >> 52));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10, byteToHexLE(union >> 48));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12, byteToHexLE(union >> 40));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14, byteToHexLE(union >> 32));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16, byteToHexLE(union >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18, byteToHexLE(union >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20, byteToHexLE(union >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8, byteToHexLE(union >>> 56));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10, byteToHexLE(union >>> 48));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12, byteToHexLE(union >>> 40));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14, byteToHexLE(union >>> 32));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16, byteToHexLE(union >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18, byteToHexLE(union >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20, byteToHexLE(union >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 22, byteToHexLE(union));
 
 		String hex = UnsafeStringUtils.toLatin1String(bytes);
@@ -174,17 +175,17 @@ public final class ObjectId implements Serializable {
 		byte[] bytes = new byte[32];
 
 		unsafe().putLong(bytes, ARRAY_BYTE_BASE_OFFSET, HEX32_PADDING);
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0 + 8, byteToHexLE(timestamp >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2 + 8, byteToHexLE(timestamp >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4 + 8, byteToHexLE(timestamp >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 0 + 8, byteToHexLE(timestamp >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 2 + 8, byteToHexLE(timestamp >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 4 + 8, byteToHexLE(timestamp >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 6 + 8, byteToHexLE(timestamp));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8 + 8, byteToHexLE(union >> 52));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10 + 8, byteToHexLE(union >> 48));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12 + 8, byteToHexLE(union >> 40));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14 + 8, byteToHexLE(union >> 32));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16 + 8, byteToHexLE(union >> 24));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18 + 8, byteToHexLE(union >> 16));
-		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20 + 8, byteToHexLE(union >> 8));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 8 + 8, byteToHexLE(union >>> 56));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 10 + 8, byteToHexLE(union >>> 48));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 12 + 8, byteToHexLE(union >>> 40));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 14 + 8, byteToHexLE(union >>> 32));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 16 + 8, byteToHexLE(union >>> 24));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 18 + 8, byteToHexLE(union >>> 16));
+		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 20 + 8, byteToHexLE(union >>> 8));
 		unsafe().putShort(bytes, ARRAY_BYTE_BASE_OFFSET + 22 + 8, byteToHexLE(union));
 
 		String hex = UnsafeStringUtils.toLatin1String(bytes);
@@ -198,6 +199,10 @@ public final class ObjectId implements Serializable {
 	}
 
 	static {
+		if (ByteOrder.nativeOrder() != ByteOrder.LITTLE_ENDIAN) {
+			throw new Error("only support little-endian!");
+		}
+
 		try {
 			MACHINE_IDENTIFIER = createMachineIdentifier();
 			PROCESS_IDENTIFIER = createProcessIdentifier();

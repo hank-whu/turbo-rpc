@@ -17,10 +17,13 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import rpc.turbo.util.SystemClock;
 import rpc.turbo.util.concurrent.ConcurrentIntegerSequencer;
 import rpc.turbo.util.concurrent.ConcurrentLongSequencer;
 import rpc.turbo.util.uuid.ObjectId;
+import rpc.turbo.util.uuid.ObjectId128;
 import rpc.turbo.util.uuid.RandomId;
+import rpc.turbo.util.uuid.RandomId128;
 
 @State(Scope.Benchmark)
 public class UUIDBenchmark {
@@ -44,40 +47,40 @@ public class UUIDBenchmark {
 		return UUID.randomUUID().toString();
 	}
 
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public long currentTimeMillis() throws Exception {
-	// return System.currentTimeMillis();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public long systemClockMills() throws Exception {
-	// return SystemClock.fast().mills();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public long systemClockSeconds() throws Exception {
-	// return SystemClock.fast().seconds();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public long nanoTime() throws Exception {
-	// return System.nanoTime();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public Instant nowInstant() throws Exception {
-	// return Instant.now();
-	// }
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public long currentTimeMillis() throws Exception {
+		return System.currentTimeMillis();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public long systemClockMills() throws Exception {
+		return SystemClock.fast().mills();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public long systemClockSeconds() throws Exception {
+		return SystemClock.fast().seconds();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public long nanoTime() throws Exception {
+		return System.nanoTime();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public Instant nowInstant() throws Exception {
+		return Instant.now();
+	}
 
 	// @Benchmark
 	// @BenchmarkMode({ Mode.Throughput })
@@ -129,62 +132,61 @@ public class UUIDBenchmark {
 		return RandomId.next();
 	}
 
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public String newRandomIdHexString() throws Exception {
-	// return RandomId.next().toHexString();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public RandomId128 newRandomId128() throws Exception {
-	// return RandomId128.next();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public String newRandomId128HexString() throws Exception {
-	// return RandomId128.next().toHexString();
-	// }
-	//
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public String newRandomIdHexString() throws Exception {
+		return RandomId.next().toHexString();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public RandomId128 newRandomId128() throws Exception {
+		return RandomId128.next();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public String newRandomId128HexString() throws Exception {
+		return RandomId128.next().toHexString();
+	}
+
 	@Benchmark
 	@BenchmarkMode({ Mode.Throughput })
 	@OutputTimeUnit(TimeUnit.MICROSECONDS)
 	public ObjectId newObjectId() throws Exception {
 		return ObjectId.next();
 	}
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public String newObjectIdHexString() throws Exception {
-	// return ObjectId.next().toHexString();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public ObjectId128 newObjectId128() throws Exception {
-	// return ObjectId128.next();
-	// }
-	//
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public String newObjectId128HexString() throws Exception {
-	// return ObjectId128.next().toHexString();
-	// }
 
-	// @Benchmark
-	// @BenchmarkMode({ Mode.Throughput })
-	// @OutputTimeUnit(TimeUnit.MICROSECONDS)
-	// public Object newObject() throws Exception {
-	// return new Object();
-	// }
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public String newObjectIdHexString() throws Exception {
+		return ObjectId.next().toHexString();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public ObjectId128 newObjectId128() throws Exception {
+		return ObjectId128.next();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public String newObjectId128HexString() throws Exception {
+		return ObjectId128.next().toHexString();
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public Object newObject() throws Exception {
+		return new Object();
+	}
 
 	public static void main(String[] args) throws Exception {
 		Instant instant = Instant.now();

@@ -4,6 +4,7 @@ import static rpc.turbo.util.UnsafeUtils.unsafe;
 import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -21,6 +22,10 @@ public class URLEncodeUtils {
 
 	// Static initializer for SAFE_CHAR
 	static {
+		if (ByteOrder.nativeOrder() != ByteOrder.LITTLE_ENDIAN) {
+			throw new Error("only support little-endian!");
+		}
+
 		// alpha characters
 		for (int i = 'a'; i <= 'z'; i++) {
 			SAFE_CHAR[i] = true;
@@ -101,8 +106,8 @@ public class URLEncodeUtils {
 
 		final ByteBuffer byteBuffer = ThreadLocalHeapByteBuffer.current();
 
-		for (final byte c : bytes) {
-			byte b = c;
+		for (int i = 0; i < bytes.length; i++) {
+			byte b = bytes[i];
 
 			if (b > 0 && SAFE_CHAR[b]) {
 				if (b == ' ') {

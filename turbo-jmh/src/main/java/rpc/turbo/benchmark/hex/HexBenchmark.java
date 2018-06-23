@@ -27,7 +27,7 @@ import rpc.turbo.util.HexUtils;
 public class HexBenchmark {
 	public static final int CONCURRENCY = Runtime.getRuntime().availableProcessors();
 
-	private String str = "哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈";
+	private String str = "哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈";
 	private byte[] bytes = str.getBytes();
 	private String hex = toHexByHexUtils().toUpperCase();
 
@@ -42,6 +42,13 @@ public class HexBenchmark {
 	@OutputTimeUnit(TimeUnit.MICROSECONDS)
 	public String toHexByHexUtils() {
 		return HexUtils.toHex(bytes);
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public String toHexByHexUtils2() {
+		return HexUtils.toHex2(bytes);
 	}
 
 	@Benchmark
@@ -63,6 +70,13 @@ public class HexBenchmark {
 	@OutputTimeUnit(TimeUnit.MICROSECONDS)
 	public byte[] fromHexByHexUtils() {
 		return HexUtils.fromHex(hex);
+	}
+
+	@Benchmark
+	@BenchmarkMode({ Mode.Throughput })
+	@OutputTimeUnit(TimeUnit.MICROSECONDS)
+	public byte[] fromHexByHexUtils2() {
+		return HexUtils.fromHex2(hex);
 	}
 
 	@Benchmark
