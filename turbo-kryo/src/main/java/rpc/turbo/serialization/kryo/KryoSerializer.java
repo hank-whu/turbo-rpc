@@ -83,7 +83,7 @@ public class KryoSerializer extends Serializer {
 
 		MethodParam methodParam = null;
 		if (byteBuf.readBoolean()) {
-			Class<?> clazz = getClass(serviceId);
+			Class<?> clazz = getMethodParamClass(serviceId);
 			methodParam = (MethodParam) kryoContext().readObject(byteBuf, clazz);
 		}
 

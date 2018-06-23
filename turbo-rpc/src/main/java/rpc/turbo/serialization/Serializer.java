@@ -36,7 +36,7 @@ public abstract class Serializer {
 	 * 
 	 * @see MethodParam
 	 */
-	public final Class<? extends MethodParam> getClass(int serviceId) {
+	public final Class<? extends MethodParam> getMethodParamClass(int serviceId) {
 		return methodParamClassResolver.getMethodParamClass(serviceId);
 	}
 

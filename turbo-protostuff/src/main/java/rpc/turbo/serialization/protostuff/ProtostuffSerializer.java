@@ -211,7 +211,7 @@ public class ProtostuffSerializer extends Serializer {
 			return schema;
 		}
 
-		schema = fastServerSchemaMap.getOrUpdate(serviceId, () -> schema(getClass(serviceId)));
+		schema = fastServerSchemaMap.getOrUpdate(serviceId, () -> schema(getMethodParamClass(serviceId)));
 
 		return schema;
 	}
