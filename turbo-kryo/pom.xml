@@ -9,7 +9,7 @@
 
 	<name>turbo-kryo</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-kryo</url>
-	<description>kryo</description>
+	<description>turbo kryo</description>
 
 	<parent>
 		<groupId>com.turbo-rpc</groupId>

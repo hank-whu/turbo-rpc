@@ -9,7 +9,7 @@
 
 	<name>turbo-protostuff</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-protostuff</url>
-	<description>protostuff</description>
+	<description>turbo protostuff</description>
 
 	<parent>
 		<groupId>com.turbo-rpc</groupId>

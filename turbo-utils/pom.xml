@@ -9,7 +9,7 @@
 
 	<name>turbo-utils</name>
 	<url>https://github.com/hank-whu/turbo-rpc/turbo-utils</url>
-	<description>utils</description>
+	<description>turbo utils</description>
 
 	<parent>
 		<groupId>com.turbo-rpc</groupId>
