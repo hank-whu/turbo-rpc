@@ -20,6 +20,7 @@
 		<module>turbo-protostuff</module>
 		<module>turbo-register-zk</module>
 		<module>turbo-spring-boot-starter</module>
+		<!--<module>turbo-jmh</module>-->
 	</modules>
 
 	<properties>
