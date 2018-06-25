@@ -5,7 +5,7 @@
 
 	<groupId>com.turbo-rpc</groupId>
 	<artifactId>turbo-all</artifactId>
-	<version>0.0.7</version>
+	<version>0.0.8</version>
 	<packaging>pom</packaging>
 
 	<name>turbo-all</name>
@@ -24,7 +24,7 @@
 	</modules>
 
 	<properties>
-		<version.turbo>0.0.7</version.turbo>
+		<version.turbo>0.0.8</version.turbo>
 
 		<maven.compiler.source>1.9</maven.compiler.source>
 		<maven.compiler.target>1.9</maven.compiler.target>
