@@ -18,6 +18,7 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.util.UnsafeUtil;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -25,6 +26,7 @@ import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
+import rpc.turbo.util.SingleClassLoader;
 import rpc.turbo.util.tuple.Tuple;
 import rpc.turbo.util.tuple.Tuple2;
 
@@ -112,7 +114,7 @@ public class FastSerializer<T> extends Serializer<T> {
 			nextClass = nextClass.getSuperclass();
 		}
 
-		return allFields.toArray(new Field[allFields.size()]);
+		return UnsafeUtil.sortFieldsByOffset(allFields);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,7 +157,8 @@ public class FastSerializer<T> extends Serializer<T> {
 		CtMethod readMethod = CtNewMethod.make(readMethodCode, serializerCtClass);
 		serializerCtClass.addMethod(readMethod);
 
-		Class<?> serializerClass = serializerCtClass.toClass();
+		byte[] bytes = serializerCtClass.toBytecode();
+		Class<?> serializerClass = SingleClassLoader.loadClass(kryo.getClassLoader(), bytes);
 
 		// 通过反射创建有参的实例
 		Serializer<T> serializer = (Serializer<T>) serializerClass.getConstructor().newInstance();
