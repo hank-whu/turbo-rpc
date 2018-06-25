@@ -1,14 +1,14 @@
 # turbo-rpc
 
-**turbo-rpc 是一款速度超凡的异步响应式RPC框架.**
+**turbo-rpc 是一款速度超凡的异步响应式RPC框架**
 ## 功能特点
- - 仅支持异步调用, Service接口所有public方法返回值都必须为CompletableFuture.
- - 配置定义在Service接口上, 而非实现类上, 方法实现者和调用者都不需要引入奇奇怪怪的注解.
- - 支持REST调用.
- - 支持失败回退, 支持熔断, 支持心跳, 支持自动重连.
- - 支持自定义 服务注册 负载均衡 序列化.
- - 支持Filter, 可通过该机制实现 Tracing 限流限速 黑白名单 等功能.
- - 支持spring boot.
+ - 仅支持异步调用, Service 接口所有 public 方法返回值都必须为 CompletableFuture
+ - 配置定义在 Service 接口上, 而非实现类上, 方法实现者和调用者都不需要引入奇奇怪怪的注解
+ - 支持 REST 调用
+ - 支持失败回退, 支持熔断, 支持心跳, 支持自动重连
+ - 支持自定义 服务注册 负载均衡 序列化
+ - 支持 Filter, 可通过该机制实现 Tracing 限流限速 黑白名单 等功能
+ - 支持 spring boot
 
 ## Quick Start
 
@@ -18,21 +18,35 @@ Maven依赖:
 <dependency>
     <groupId>com.turbo-rpc</groupId>
     <artifactId>turbo-rpc</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.7</version>
+</dependency>
+
+<!-- 序列化方式，kryo protostuff 两个中任选一个 -->
+<dependency>
+    <groupId>com.turbo-rpc</groupId>
+    <artifactId>turbo-kryo</artifactId>
+    <version>0.0.7</version>
+</dependency>
+
+<!-- 序列化方式，kryo protostuff 两个中任选一个 -->
+<dependency>
+    <groupId>com.turbo-rpc</groupId>
+    <artifactId>turbo-protostuff</artifactId>
+    <version>0.0.7</version>
 </dependency>
 
 <!-- zk注册中心，可选引入 -->
 <dependency>
     <groupId>com.turbo-rpc</groupId>
     <artifactId>turbo-register-zk</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.7</version>
 </dependency>
 
 <!-- SpringBoot集成，可选引入 -->
 <dependency>
     <groupId>com.turbo-rpc</groupId>
     <artifactId>turbo-spring-boot-starter</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.7</version>
 </dependency>
 ```
 

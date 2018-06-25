@@ -1,6 +1,22 @@
 # 发布说明
 ----------------------------------------------
 
+## turbo-0.0.7
+发布时间: 2018-06-25
+
+更新说明: 
+1. 重新实现了 kryo protostuff 的序列化实现，显著提高性能
+2. 通过代码静态扫描，找出 rpc 方法用到的类，并注册到 kryo protostuff 中
+3. 优化了 HexUtils URLEncodeUtils 的性能
+4. 修复了几个移位操作 bug
+5. 拆分出 turbo-utils turbo-kryo turbo-protostuff 三个项目
+6. 修改了 mvn 结构，方便 idea 导入项目
+7. 升级 javassist 到 3.23.0-GA
+8. 升级 netty 到 4.1.25.Final
+9. 升级 spring-boot 到 2.0.3.RELEASE
+
+----------------------------------------------
+
 ## turbo-0.0.6
 发布时间: 2018-05-11
 
