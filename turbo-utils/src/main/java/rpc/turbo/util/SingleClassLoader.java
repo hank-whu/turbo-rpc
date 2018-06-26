@@ -1,5 +1,11 @@
 package rpc.turbo.util;
 
+/**
+ * 单个类的类加载器
+ * 
+ * @author hank
+ *
+ */
 public class SingleClassLoader extends ClassLoader {
 
 	private final Class<?> clazz;
@@ -9,9 +15,17 @@ public class SingleClassLoader extends ClassLoader {
 		this.clazz = defineClass(null, bytes, 0, bytes.length, null);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Class<T> getClazz() {
-		return (Class<T>) clazz;
+	public Class<?> getClazz() {
+		return clazz;
+	}
+
+	@Override
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		if (clazz != null && clazz.getName().equals(name)) {
+			return clazz;
+		}
+
+		return getParent().loadClass(name);
 	}
 
 	public static <T> Class<T> loadClass(byte[] bytes) {
@@ -19,7 +33,8 @@ public class SingleClassLoader extends ClassLoader {
 		return loadClass(parent, bytes);
 	}
 
-	public static <T> Class<T> loadClass(ClassLoader classLoader, byte[] bytes) {
-		return new SingleClassLoader(classLoader, bytes).getClazz();
+	@SuppressWarnings("unchecked")
+	public static <T> Class<T> loadClass(ClassLoader parent, byte[] bytes) {
+		return (Class<T>) new SingleClassLoader(parent, bytes).getClazz();
 	}
 }

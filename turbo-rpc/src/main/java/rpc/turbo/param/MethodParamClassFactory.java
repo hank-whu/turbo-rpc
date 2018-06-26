@@ -60,11 +60,15 @@ public final class MethodParamClassFactory {
 	 * }
 	 * </pre>
 	 * 
+	 * @param method
+	 *            方法
+	 * @return MethodParamClass
+	 * 
+	 * @throws CannotCompileException
+	 * @throws NotFoundException
 	 * 
 	 * @author Hank
-	 *
 	 */
-
 	public static Class<? extends MethodParam> createClass(Method method)
 			throws CannotCompileException, NotFoundException {
 		Objects.requireNonNull(method, "method must not be null");

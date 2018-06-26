@@ -1,5 +1,6 @@
 package rpc.turbo.test;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 import javassist.CannotCompileException;
@@ -10,7 +11,7 @@ import rpc.turbo.param.MethodParamClassFactory;
 
 public class MethodParamClassFactoryTest {
 
-	public static void main(String[] args) throws CannotCompileException, NotFoundException {
+	public static void main(String[] args) throws CannotCompileException, NotFoundException, IOException {
 		CtClass.debugDump = "/tmp/debugDump";
 
 		for (Method method : UserService.class.getMethods()) {

@@ -21,6 +21,7 @@ import javassist.Modifier;
 import rpc.turbo.param.EmptyMethodParam;
 import rpc.turbo.param.MethodParam;
 import rpc.turbo.param.MethodParamClassFactory;
+import rpc.turbo.util.SingleClassLoader;
 import rpc.turbo.util.TypeUtils;
 
 /**
@@ -358,7 +359,8 @@ public class JavassistInvoker<T> implements Invoker<T> {
 			invokerCtClass.addMethod(m);
 		}
 
-		Class<?> invokerClass = invokerCtClass.toClass();
+		byte[] bytes = invokerCtClass.toBytecode();
+		Class<?> invokerClass = SingleClassLoader.loadClass(service.getClass().getClassLoader(), bytes);
 
 		// 通过反射创建有参的实例
 		@SuppressWarnings("unchecked")

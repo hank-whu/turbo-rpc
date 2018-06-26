@@ -16,6 +16,7 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
+import rpc.turbo.util.SingleClassLoader;
 
 /**
  * 客户端失败回退Invoker工厂类
@@ -199,7 +200,8 @@ public class FailoverInvokerFactory {
 			defaultImplCtClass.addMethod(m);
 		}
 
-		Class<?> invokerClass = defaultImplCtClass.toClass();
+		byte[] bytes = defaultImplCtClass.toBytecode();
+		Class<?> invokerClass = SingleClassLoader.loadClass(getClass().getClassLoader(), bytes);
 
 		return invokerClass.getConstructor().newInstance();
 	}
