@@ -12,9 +12,6 @@ public class BatchSender {
 	public static final int MAX_SEND_BUFFER_SIZE = 16;
 	public static final int MAX_SEND_LOOP_COUNT = 16;
 
-	/** in mills */
-	public static final long MAX_WAIT_TIME = 1L;
-
 	private volatile Channel channel;
 
 	private final MpscGrowableAtomicArrayQueue<RequestWithFuture> queue //
