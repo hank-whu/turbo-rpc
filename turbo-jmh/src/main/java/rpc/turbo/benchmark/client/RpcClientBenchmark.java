@@ -114,24 +114,24 @@ public class RpcClientBenchmark extends AbstractClient {
 		// CtClass.debugDump = "d:/debugDump";
 
 		RpcClientBenchmark clientBenchmark = new RpcClientBenchmark();
-		System.out.println(clientBenchmark.existUser());
-		System.out.println(clientBenchmark.getUser());
-		System.out.println(clientBenchmark.listUser());
-		System.out.println(clientBenchmark.createUser());
+		// System.out.println(clientBenchmark.existUser());
+		// System.out.println(clientBenchmark.getUser());
+		// System.out.println(clientBenchmark.listUser());
+		// System.out.println(clientBenchmark.createUser());
 
 		// System.exit(1);
 
-		ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(32);
+		ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(256);
 		RejectedExecutionHandler rejectedExecutionHandler = new ThreadPoolExecutor.CallerRunsPolicy();
-		ThreadPoolExecutor executor = new ThreadPoolExecutor(32, 32, Long.MAX_VALUE, TimeUnit.DAYS, workQueue,
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(256, 256, Long.MAX_VALUE, TimeUnit.DAYS, workQueue,
 				rejectedExecutionHandler);
 
 		Instant last = Instant.now();
-		for (int i = 0; i < 0/* Long.MAX_VALUE */; i++) {
+		for (int i = 0; i < Long.MAX_VALUE; i++) {
 
 			executor.submit(() -> {
 				try {
-					clientBenchmark.getUser();
+					clientBenchmark.createUser();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

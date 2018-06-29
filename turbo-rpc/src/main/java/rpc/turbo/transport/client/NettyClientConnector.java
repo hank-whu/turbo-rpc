@@ -26,6 +26,8 @@ import rpc.turbo.transport.client.handler.TurboChannelInitializer;
 final class NettyClientConnector implements Closeable {
 	private static final Log logger = LogFactory.getLog(NettyClientConnector.class);
 
+	public static final int MAX_SEND_BUFFER_SIZE = 1024;
+
 	public final HostPort serverAddress;
 
 	private final Serializer serializer;
@@ -34,6 +36,7 @@ final class NettyClientConnector implements Closeable {
 
 	public volatile HostPort clientAddress;
 	private volatile Channel[] channels;
+	private final BatchSender[] batchSenders;
 
 	/**
 	 * 
@@ -50,6 +53,7 @@ final class NettyClientConnector implements Closeable {
 		this.connectCount = connectCount;
 		this.serverAddress = serverAddress;
 		this.serializer = serializer;
+		this.batchSenders = new BatchSender[connectCount];
 	}
 
 	int connectCount() {
@@ -61,7 +65,7 @@ final class NettyClientConnector implements Closeable {
 	 * @param channelIndex
 	 *            发送数据的channel
 	 * 
-	 * @param request
+	 * @param requestWithFuture
 	 *            请求数据
 	 */
 	void send(int channelIndex, RequestWithFuture requestWithFuture) {
@@ -69,6 +73,20 @@ final class NettyClientConnector implements Closeable {
 
 		Channel channel = channels[channelIndex];
 		channel.writeAndFlush(requestWithFuture, channel.voidPromise());
+	}
+
+	/**
+	 * 尽可能尝试批量发送
+	 * 
+	 * @param channelIndex
+	 *            发送数据的channel
+	 * 
+	 * @param requestWithFuture
+	 *            请求数据
+	 * 
+	 */
+	void tryBatchSend(int channelIndex, RequestWithFuture requestWithFuture) {
+		batchSenders[channelIndex].send(requestWithFuture);
 	}
 
 	void connect() throws InterruptedException {
@@ -93,7 +111,16 @@ final class NettyClientConnector implements Closeable {
 
 		Channel[] newChannels = new Channel[connectCount];
 		for (int i = 0; i < connectCount; i++) {
-			newChannels[i] = bootstrap.connect(serverAddress.host, serverAddress.port).sync().channel();
+			Channel channel = bootstrap.connect(serverAddress.host, serverAddress.port).sync().channel();
+			newChannels[i] = channel;
+
+			BatchSender batchSender = batchSenders[i];
+			if (batchSender == null) {
+				batchSender = new BatchSender();
+				batchSenders[i] = batchSender;
+			}
+
+			batchSender.setChannel(channel);
 
 			if (logger.isInfoEnabled()) {
 				logger.info(serverAddress + " connect " + i + "/" + connectCount);

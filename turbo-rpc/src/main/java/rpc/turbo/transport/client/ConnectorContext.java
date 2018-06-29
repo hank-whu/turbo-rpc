@@ -186,7 +186,7 @@ final class ConnectorContext implements Weightable, Closeable {
 	 * @return
 	 */
 	<T> CompletableFuture<T> execute(int serviceId, long timeout) {
-		return execute(serviceId, timeout, null, null);
+		return execute(serviceId, timeout, false, null, null);
 	}
 
 	/**
@@ -202,7 +202,7 @@ final class ConnectorContext implements Weightable, Closeable {
 	 *            失败回退
 	 * @return
 	 */
-	<T> CompletableFuture<T> execute(int serviceId, long timeout, MethodParam methodParam,
+	<T> CompletableFuture<T> execute(int serviceId, long timeout, boolean batchMode, MethodParam methodParam,
 			Invoker<CompletableFuture<?>> failoverInvoker) {
 
 		if (isClosed) {
@@ -245,9 +245,15 @@ final class ConnectorContext implements Weightable, Closeable {
 			if (allowSend) {
 				long expireTime = SystemClock.fast().mills() + timeout;
 
-				connector.send(//
-						channelIndex(request), //
-						new RequestWithFuture(request, future, expireTime));
+				if (batchMode) {
+					connector.tryBatchSend(//
+							channelIndex(request), //
+							new RequestWithFuture(request, future, expireTime));
+				} else {
+					connector.send(//
+							channelIndex(request), //
+							new RequestWithFuture(request, future, expireTime));
+				}
 			} else {
 				future.completeExceptionally(new RemoteException(RpcClientFilter.CLIENT_FILTER_DENY, false));
 			}

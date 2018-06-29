@@ -2,7 +2,10 @@ package rpc.turbo.transport.client.codec;
 
 import static rpc.turbo.config.TurboConstants.EXPIRE_PERIOD;
 
+import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.List;
+import java.util.RandomAccess;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -16,23 +19,35 @@ import rpc.turbo.serialization.Serializer;
 import rpc.turbo.transport.client.future.FutureContainer;
 import rpc.turbo.transport.client.future.RequestWithFuture;
 
-public class RequestEncoder extends MessageToByteEncoder<RequestWithFuture> {
-	private static final Log logger = LogFactory.getLog(RequestEncoder.class);
+public class RequestListEncoder extends MessageToByteEncoder<List<RequestWithFuture>> {
+	private static final Log logger = LogFactory.getLog(RequestListEncoder.class);
 
 	private final Serializer serializer;
 	private final FutureContainer futureContainer;
 
-	public RequestEncoder(Serializer serializer, FutureContainer futureContainer) {
+	public RequestListEncoder(Serializer serializer, FutureContainer futureContainer) {
 		this.serializer = serializer;
 		this.futureContainer = futureContainer;
 	}
 
-	protected void encode(ChannelHandlerContext ctx, RequestWithFuture requestWithFuture, ByteBuf buffer)
+	protected void encode(ChannelHandlerContext ctx, List<RequestWithFuture> requestList, ByteBuf buffer)
 			throws Exception {
-		futureContainer.add(requestWithFuture);
-		serializer.writeRequest(buffer, requestWithFuture.getRequest());
+		if (requestList instanceof RandomAccess) {
+			for (int i = 0; i < requestList.size(); i++) {
+				doEncode(buffer, requestList.get(i));
+			}
+		} else {
+			for (RequestWithFuture request : requestList) {
+				doEncode(buffer, request);
+			}
+		}
+	}
 
-		requestWithFuture.setRequest(null);// help to gc
+	private void doEncode(ByteBuf buffer, RequestWithFuture request) throws IOException {
+		futureContainer.add(request);
+		serializer.writeRequest(buffer, request.getRequest());
+
+		request.setRequest(null);// help to gc
 	}
 
 	@Override

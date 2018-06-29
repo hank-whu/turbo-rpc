@@ -499,7 +499,7 @@ public class App implements Closeable {
 			return CompletableFuture.failedFuture(new RemoteException(msg, false));
 		}
 
-		return connectorContext.execute(serviceId, timeout, methodParam, failoverInvoker);
+		return connectorContext.execute(serviceId, timeout, true, methodParam, failoverInvoker);
 	}
 
 	/**

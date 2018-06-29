@@ -22,6 +22,8 @@ public final class FutureContainer implements Closeable {
 	private final IntObjectHashMap<RequestWithFuture> futureMap = //
 			new IntObjectHashMap<>();
 
+	private boolean startingAutoExpireJob = false;
+
 	public void add(RequestWithFuture requestWithFuture) {
 		if (requestWithFuture.getFuture().isDone()) {
 			return;
@@ -99,6 +101,14 @@ public final class FutureContainer implements Closeable {
 
 		}
 
+	}
+
+	public boolean isStartingAutoExpireJob() {
+		return startingAutoExpireJob;
+	}
+
+	public void setStartingAutoExpireJob(boolean startingAutoExpireJob) {
+		this.startingAutoExpireJob = startingAutoExpireJob;
 	}
 
 	/**

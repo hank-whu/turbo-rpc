@@ -53,7 +53,8 @@ public class KryoSerializer extends Serializer {
 	public void writeRequest(ByteBuf byteBuf, Request request) throws IOException {
 		final int beginWriterIndex = byteBuf.writerIndex();
 
-		byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
+		byteBuf.writeInt(0);
+		// byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
 		byteBuf.writeInt(request.getRequestId());
 		ByteBufUtils.writeVarInt(byteBuf, request.getServiceId());
 		tracerSerializer.write(byteBuf, request.getTracer());
@@ -70,8 +71,9 @@ public class KryoSerializer extends Serializer {
 
 		byteBuf.setInt(beginWriterIndex, length);
 
-		//System.out.println("request content: " + new String(ByteBufUtil.getBytes(byteBuf.duplicate())));
-		//System.out.println("request length: " + byteBuf.writerIndex());
+		// System.out.println("request content: " + new
+		// String(ByteBufUtil.getBytes(byteBuf.duplicate())));
+		// System.out.println("request length: " + byteBuf.writerIndex());
 
 		RecycleUtils.release(request);
 	}
@@ -95,7 +97,8 @@ public class KryoSerializer extends Serializer {
 	public void writeResponse(ByteBuf byteBuf, Response response) throws IOException {
 		final int beginWriterIndex = byteBuf.writerIndex();
 
-		byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
+		byteBuf.writeInt(0);
+		// byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
 		byteBuf.writeInt(response.getRequestId());
 
 		final int statusWriterIndex = byteBuf.writerIndex();
@@ -125,8 +128,9 @@ public class KryoSerializer extends Serializer {
 
 	public Response readResponse(ByteBuf byteBuf) throws IOException {
 
-		//System.out.println("response content: " + new String(ByteBufUtil.getBytes(byteBuf.duplicate())));
-		//System.out.println("response length: " + byteBuf.readableBytes());
+		// System.out.println("response content: " + new
+		// String(ByteBufUtil.getBytes(byteBuf.duplicate())));
+		// System.out.println("response length: " + byteBuf.readableBytes());
 
 		int requestId = byteBuf.readInt();
 		byte statusCode = byteBuf.readByte();

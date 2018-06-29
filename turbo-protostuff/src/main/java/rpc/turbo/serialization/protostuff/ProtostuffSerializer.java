@@ -83,7 +83,8 @@ public class ProtostuffSerializer extends Serializer {
 	public void writeRequest(ByteBuf byteBuf, Request request) throws IOException {
 		final int beginWriterIndex = byteBuf.writerIndex();
 
-		byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
+		byteBuf.writeInt(0);
+		// byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
 		byteBuf.writeInt(request.getRequestId());
 		ByteBufUtils.writeVarInt(byteBuf, request.getServiceId());
 		TRACER_SERIALIZER.write(byteBuf, request.getTracer());
@@ -107,8 +108,9 @@ public class ProtostuffSerializer extends Serializer {
 
 		byteBuf.setInt(beginWriterIndex, length);
 
-		//System.out.println("request content: " + new String(ByteBufUtil.getBytes(byteBuf.duplicate())));
-		//System.out.println("request length: " + byteBuf.writerIndex());
+		// System.out.println("request content: " + new
+		// String(ByteBufUtil.getBytes(byteBuf.duplicate())));
+		// System.out.println("request length: " + byteBuf.writerIndex());
 
 		RecycleUtils.release(request);
 	}
@@ -138,7 +140,8 @@ public class ProtostuffSerializer extends Serializer {
 
 	public void writeResponse(ByteBuf byteBuf, Response response) throws IOException {
 		int beginWriterIndex = byteBuf.writerIndex();
-		byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
+		byteBuf.writeInt(0);
+		// byteBuf.writerIndex(beginWriterIndex + TurboConstants.HEADER_FIELD_LENGTH);
 
 		ByteBufOutput output = getOrUpdate(OUTPUT_ATTACHMENT_INDEX, OUTPUT_SUPPLIER);
 		output.setByteBuf(byteBuf);
@@ -167,8 +170,9 @@ public class ProtostuffSerializer extends Serializer {
 
 	public Response readResponse(ByteBuf byteBuf) throws IOException {
 
-		//System.out.println("response content: " + new String(ByteBufUtil.getBytes(byteBuf.duplicate())));
-		//System.out.println("response length: " + byteBuf.readableBytes());
+		// System.out.println("response content: " + new
+		// String(ByteBufUtil.getBytes(byteBuf.duplicate())));
+		// System.out.println("response length: " + byteBuf.readableBytes());
 
 		ByteBufInput input = getOrUpdate(INPUT_ATTACHMENT_INDEX, INPUT_SUPPLIER);
 		input.setByteBuf(byteBuf, true);
