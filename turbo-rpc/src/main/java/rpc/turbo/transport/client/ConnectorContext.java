@@ -186,7 +186,7 @@ final class ConnectorContext implements Weightable, Closeable {
 	 * @return
 	 */
 	<T> CompletableFuture<T> execute(int serviceId, long timeout) {
-		return execute(serviceId, timeout, false, null, null);
+		return execute(serviceId, timeout, null, null);
 	}
 
 	/**
@@ -202,7 +202,7 @@ final class ConnectorContext implements Weightable, Closeable {
 	 *            失败回退
 	 * @return
 	 */
-	<T> CompletableFuture<T> execute(int serviceId, long timeout, boolean batchMode, MethodParam methodParam,
+	<T> CompletableFuture<T> execute(int serviceId, long timeout, MethodParam methodParam,
 			Invoker<CompletableFuture<?>> failoverInvoker) {
 
 		if (isClosed) {
@@ -245,15 +245,9 @@ final class ConnectorContext implements Weightable, Closeable {
 			if (allowSend) {
 				long expireTime = SystemClock.fast().mills() + timeout;
 
-				if (batchMode) {
-					connector.tryBatchSend(//
-							channelIndex(request), //
-							new RequestWithFuture(request, future, expireTime));
-				} else {
-					connector.send(//
-							channelIndex(request), //
-							new RequestWithFuture(request, future, expireTime));
-				}
+				connector.send(//
+						channelIndex(request), //
+						new RequestWithFuture(request, future, expireTime));
 			} else {
 				future.completeExceptionally(new RemoteException(RpcClientFilter.CLIENT_FILTER_DENY, false));
 			}
@@ -331,9 +325,6 @@ final class ConnectorContext implements Weightable, Closeable {
 
 			doResponseFilter(request, response, method, serviceMethodName, throwable);
 
-			T result = (T) response.getResult();
-			RecycleUtils.release(response);
-
 			int channelIndex = channelIndex(request);
 			if (error) {
 				errorCounter.incrementAndGet(channelIndex);
@@ -341,6 +332,10 @@ final class ConnectorContext implements Weightable, Closeable {
 				return null;
 			} else {
 				errorCounter.reset(channelIndex);
+
+				T result = (T) response.getResult();
+				RecycleUtils.release(response);
+
 				return result;
 			}
 
@@ -409,9 +404,6 @@ final class ConnectorContext implements Weightable, Closeable {
 
 			doResponseFilter(request, response, method, serviceMethodName, throwable);
 
-			T result = (T) response.getResult();
-			RecycleUtils.release(response);
-
 			int channelIndex = channelIndex(request);
 			if (error) {
 				if (logger.isInfoEnabled()) {
@@ -429,6 +421,10 @@ final class ConnectorContext implements Weightable, Closeable {
 				});
 			} else {
 				errorCounter.reset(channelIndex);
+
+				T result = (T) response.getResult();
+				RecycleUtils.release(response);
+
 				futureWithFailover.complete(result);
 			}
 		});

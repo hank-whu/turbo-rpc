@@ -85,6 +85,7 @@ public final class FutureContainer implements Closeable {
 
 			long now = SystemClock.fast().mills();
 
+			// 防止执行过长时间
 			if (now > finishTime) {
 				break;
 			}
@@ -95,12 +96,14 @@ public final class FutureContainer implements Closeable {
 
 			iterator.remove();
 
-			requestWithFuture//
-					.getFuture()//
-					.completeExceptionally(ResponseTimeoutException.NONE_STACK_TRACE);
+			CompletableFuture<Response> future = requestWithFuture.getFuture();
 
+			if (future.isDone()) {
+				return;
+			} else {
+				future.completeExceptionally(ResponseTimeoutException.NONE_STACK_TRACE);
+			}
 		}
-
 	}
 
 	public boolean isStartingAutoExpireJob() {
