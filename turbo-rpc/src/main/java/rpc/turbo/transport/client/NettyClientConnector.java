@@ -22,8 +22,8 @@ import rpc.turbo.config.HostPort;
 import rpc.turbo.serialization.Serializer;
 import rpc.turbo.transport.client.future.RequestWithFuture;
 import rpc.turbo.transport.client.handler.TurboChannelInitializer;
+import rpc.turbo.transport.client.sender.BatchSender;
 import rpc.turbo.transport.client.sender.Sender;
-import rpc.turbo.transport.client.sender.SingleSender;
 
 final class NettyClientConnector implements Closeable {
 	private static final Log logger = LogFactory.getLog(NettyClientConnector.class);
@@ -96,7 +96,7 @@ final class NettyClientConnector implements Closeable {
 		Sender[] newSenders = new Sender[connectCount];
 		for (int i = 0; i < connectCount; i++) {
 			Channel channel = bootstrap.connect(serverAddress.host, serverAddress.port).sync().channel();
-			newSenders[i] = new SingleSender(channel);
+			newSenders[i] = new BatchSender(channel);
 
 			if (logger.isInfoEnabled()) {
 				logger.info(serverAddress + " connect " + i + "/" + connectCount);
