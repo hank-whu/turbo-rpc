@@ -5,21 +5,22 @@ import java.io.IOException;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoop;
-import io.netty.util.internal.shaded.org.jctools.queues.atomic.MpscGrowableAtomicArrayQueue;
+import io.netty.util.internal.shaded.org.jctools.queues.atomic.MpscAtomicArrayQueue;
 import rpc.turbo.transport.client.future.RequestWithFuture;
 import rpc.turbo.util.FastClearableArrayList;
 
 public class BatchSender implements Sender {
-	public static final int MAX_SEND_BUFFER_SIZE = 16;
+	public static final int MAX_SEND_BUFFER_SIZE = 256;
 	public static final int MAX_SEND_LOOP_COUNT = 16;
+	public static final int MAX_BATCH_SIZE = 16;
 
 	private final Channel channel;
 	private final ChannelPromise voidPromise;
 	private final EventLoop eventLoop;
 
-	private final MpscGrowableAtomicArrayQueue<RequestWithFuture> queue //
-			= new MpscGrowableAtomicArrayQueue<>(8, 4 * MAX_SEND_BUFFER_SIZE);
-	private final FastClearableArrayList<RequestWithFuture> sendBuffer //
+	private final MpscAtomicArrayQueue<RequestWithFuture> sendBuffer //
+			= new MpscAtomicArrayQueue<>(MAX_SEND_BUFFER_SIZE);
+	private final FastClearableArrayList<RequestWithFuture> batchList //
 			= new FastClearableArrayList<>();
 
 	private final Runnable batchSendTask = () -> doBatchSend();
@@ -32,39 +33,39 @@ public class BatchSender implements Sender {
 
 	@Override
 	public void send(RequestWithFuture request) {
-		while (!queue.offer(request)) {
+		while (!sendBuffer.offer(request)) {
 			// 已经满了，必须要清理
 			eventLoop.execute(batchSendTask);
 		}
 
-		if (!queue.isEmpty()) {
+		if (!sendBuffer.isEmpty()) {
 			eventLoop.execute(batchSendTask);
 		}
 	}
 
 	private void doBatchSend() {
-		if (queue.isEmpty()) {
+		if (sendBuffer.isEmpty()) {
 			return;
 		}
 
 		for (int r = 0; r < MAX_SEND_LOOP_COUNT; r++) {
-			for (int i = 0; i < MAX_SEND_BUFFER_SIZE; i++) {
-				RequestWithFuture request = queue.poll();
+			for (int i = 0; i < MAX_BATCH_SIZE; i++) {
+				RequestWithFuture request = sendBuffer.poll();
 
 				if (request != null) {
-					sendBuffer.add(request);
+					batchList.add(request);
 				} else {
 					break;
 				}
 			}
 
-			if (!sendBuffer.isEmpty()) {
-				channel.write(sendBuffer, voidPromise);
+			if (!batchList.isEmpty()) {
+				channel.write(batchList, voidPromise);
 			}
 
-			sendBuffer.clear();
+			batchList.clear();
 
-			if (queue.isEmpty()) {
+			if (sendBuffer.isEmpty()) {
 				break;
 			}
 		}
