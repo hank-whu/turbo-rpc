@@ -61,9 +61,8 @@ public class BatchSender implements Sender {
 
 			if (!batchList.isEmpty()) {
 				channel.write(batchList, voidPromise);
+				batchList.clear();
 			}
-
-			batchList.clear();
 
 			if (sendBuffer.isEmpty()) {
 				break;

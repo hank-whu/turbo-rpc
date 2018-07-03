@@ -289,7 +289,7 @@ public class FastSerializer<T> extends Serializer<T> {
 
 		if (type == char.class) {
 			// output.getChar(target.fieldName)
-			builder.append("output.getChar(");
+			builder.append("output.writeChar(");
 			appendGetFieldValue(builder, field);
 			builder.append(");");
 			return;
