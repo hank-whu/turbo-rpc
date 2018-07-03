@@ -22,6 +22,8 @@ public class RandomLoadBalance<T extends Weightable> implements LoadBalance<T> {
 
 	@Override
 	public T select() {
+		final WeightableGroup<T> weightableGroup = this.weightableGroup;
+
 		if (weightableGroup == null) {
 			return null;
 		}

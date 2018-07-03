@@ -24,6 +24,8 @@ public class RoundRobinLoadBalance<T extends Weightable> implements LoadBalance<
 
 	@Override
 	public T select() {
+		final WeightableGroup<T> weightableGroup = this.weightableGroup;
+
 		if (weightableGroup == null) {
 			return null;
 		}
