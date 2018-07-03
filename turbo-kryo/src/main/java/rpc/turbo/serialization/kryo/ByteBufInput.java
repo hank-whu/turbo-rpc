@@ -286,7 +286,7 @@ public class ByteBufInput extends Input {
 
 	/** Reads a 2 byte short as an int from 0 to 65535. */
 	public int readShortUnsigned() throws KryoException {
-		return byteBuf.readShort();
+		return byteBuf.readShort() & 0xFFFF;
 	}
 
 	/** Reads an 8 byte long. */

@@ -240,8 +240,8 @@ public class ByteBufOutput extends Output {
 	 *            May be null.
 	 */
 	public void writeString(CharSequence value) throws KryoException {
-		if (value instanceof String) {
-			writeStringFast(value.toString());
+		if (value == null) {
+			writeStringFast(null);
 			return;
 		}
 
