@@ -2,6 +2,7 @@ package rpc.turbo.benchmark.serialization.manual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.RandomAccess;
 
 import io.netty.buffer.ByteBuf;
 import rpc.turbo.benchmark.bean.Page;
@@ -19,8 +20,14 @@ public class UserPageSerializer implements Serializer<Page<User>> {
 		byteBuf.writeInt(userPage.getTotal());
 		byteBuf.writeInt(userList.size());
 
-		for (User user : userList) {
-			userSerializer.write(byteBuf, user);
+		if (userList instanceof RandomAccess) {
+			for (int i = 0; i < userList.size(); i++) {
+				userSerializer.write(byteBuf, userList.get(i));
+			}
+		} else {
+			for (User user : userList) {
+				userSerializer.write(byteBuf, user);
+			}
 		}
 	}
 
