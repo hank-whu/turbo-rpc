@@ -11,9 +11,6 @@ import static io.protostuff.WireFormat.WIRETYPE_VARINT;
 import static io.protostuff.WireFormat.makeTag;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -23,8 +20,6 @@ import rpc.turbo.util.ByteBufUtils;
 import rpc.turbo.util.UnsafeStringUtils;
 
 public final class ByteBufOutput implements Output {
-	private static final MethodHandle byteStringGetBytesMethodHandle;
-
 	private ByteBuf byteBuf;
 
 	public ByteBufOutput(final ByteBuf buffer) {
@@ -192,12 +187,7 @@ public final class ByteBufOutput implements Output {
 
 	@Override
 	public void writeBytes(int fieldNumber, ByteString value, boolean repeated) throws IOException {
-		try {
-			byte[] bytes = (byte[]) byteStringGetBytesMethodHandle.invokeExact(value);
-			writeByteArray(fieldNumber, bytes, repeated);
-		} catch (Throwable e) {
-			throw new IOException(e);
-		}
+		writeByteArray(fieldNumber, value.getBytes(), repeated);
 	}
 
 	@Override
@@ -232,15 +222,6 @@ public final class ByteBufOutput implements Output {
 		ByteBufUtils.writeVarInt(byteBuf, value.readableBytes());
 
 		byteBuf.writeBytes(value);
-	}
-
-	static {
-		try {
-			byteStringGetBytesMethodHandle = MethodHandles.privateLookupIn(ByteString.class, MethodHandles.lookup())
-					.findVirtual(ByteString.class, "getBytes", MethodType.methodType(byte[].class));
-		} catch (Exception e) {
-			throw new Error(e);
-		}
 	}
 
 }
