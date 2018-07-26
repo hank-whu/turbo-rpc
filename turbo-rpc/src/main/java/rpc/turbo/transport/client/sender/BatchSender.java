@@ -10,9 +10,9 @@ import rpc.turbo.transport.client.future.RequestWithFuture;
 import rpc.turbo.util.FastClearableArrayList;
 
 public class BatchSender implements Sender {
-	public static final int MAX_SEND_BUFFER_SIZE = 256;
+	public static final int MAX_SEND_BUFFER_SIZE = 1024;
 	public static final int MAX_SEND_LOOP_COUNT = 16;
-	public static final int MAX_BATCH_SIZE = 16;
+	public static final int MAX_BATCH_SIZE = 64;
 
 	private final Channel channel;
 	private final ChannelPromise voidPromise;
