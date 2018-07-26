@@ -55,12 +55,10 @@ public class RequestListEncoder extends MessageToByteEncoder<List<RequestWithFut
 			ChannelPromise promise) throws Exception {
 		super.connect(ctx, remoteAddress, localAddress, promise);
 
-		if (!futureContainer.isStartingAutoExpireJob()) {
+		if (ctx.channel().attr(CodecConstants.STARTED_AUTO_EXPIRE_JOB).compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
 			ctx.executor().scheduleAtFixedRate(//
 					() -> futureContainer.doExpireJob(1), //
 					EXPIRE_PERIOD, EXPIRE_PERIOD, TimeUnit.MILLISECONDS);
-
-			futureContainer.setStartingAutoExpireJob(true);
 
 			if (logger.isInfoEnabled()) {
 				logger.info("FutureContainer startingAutoExpireJob");
