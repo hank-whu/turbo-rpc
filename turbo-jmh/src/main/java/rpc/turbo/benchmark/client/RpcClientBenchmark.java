@@ -127,7 +127,7 @@ public class RpcClientBenchmark extends AbstractClient {
 				rejectedExecutionHandler);
 
 		Instant last = Instant.now();
-		for (int i = 0; i < Long.MAX_VALUE; i++) {
+		for (int i = 0; i < 1/*Long.MAX_VALUE*/; i++) {
 
 			executor.submit(() -> {
 				try {
